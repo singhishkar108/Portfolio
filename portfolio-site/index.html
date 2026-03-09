@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html class="dark" lang="en">
 
 <head>
@@ -29,13 +28,13 @@
             theme: {
                 extend: {
                     colors: {
-                        "primary": "#0d0df2",
-                        "aurora-purple": "#8b5cf6",
-                        "aurora-pink": "#ec4899",
+                        "primary": "#0b0bd9",
+                        "aurora-purple": "#492b8c",
+                        "aurora-pink": "#610533",
                         "background-dark": "#050505",
                         "surface-dark": "#101015",
                         "glass-border": "rgba(255, 255, 255, 0.08)",
-                        "glass-bg": "rgba(10, 10, 15, 0.6)",
+                        "glass-bg": "rgba(10, 10, 15, 0.6)"
                     },
                     fontFamily: {
                         "display": ["Inter", "sans-serif"]
@@ -48,14 +47,160 @@
                         "full": "9999px"
                     },
                     backgroundImage: {
-                        'aurora-gradient': 'radial-gradient(circle at 50% 0%, rgba(139, 92, 246, 0.15), transparent 50%), radial-gradient(circle at 100% 0%, rgba(236, 72, 153, 0.15), transparent 50%), radial-gradient(circle at 0% 0%, rgba(13, 13, 242, 0.15), transparent 50%)',
+                        'aurora-gradient':
+                            'radial-gradient(circle at 50% 0%, rgba(139, 92, 246, 0.15), transparent 50%), radial-gradient(circle at 100% 0%, rgba(236, 72, 153, 0.15), transparent 50%), radial-gradient(circle at 0% 0%, rgba(13, 13, 242, 0.15), transparent 50%)'
+                    },
+
+                    keyframes: {
+                        orbPulse: {
+                            '0%, 100%': { opacity: '0.5' },
+                            '50%': { opacity: '0.4' }
+                        }
+                    },
+                    animation: {
+                        'orb-pulse': 'orbPulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite'
                     }
-                },
-            },
-        }
+                }
+            }
+        };
     </script>
+
+    <script>
+        window.addEventListener('load', () => {
+            const phrases = ["Cloud Computing", "Cybersecurity", "Artificial Intelligence (AI)", "Software Development", "DevOps"];
+            let currentIndex = 0;
+
+            const textElement = document.getElementById("sliding-text");
+            const container = textElement.parentElement;
+
+            // Set initial width so the first transition isn't a "snap"
+            container.style.width = textElement.offsetWidth + "px";
+
+            function updateText() {
+                // 1. Exit Animation (Slide Up)
+                textElement.classList.remove("slide-up-enter");
+                textElement.classList.add("slide-up-exit");
+
+                setTimeout(() => {
+                    // 2. Change Text
+                    currentIndex = (currentIndex + 1) % phrases.length;
+                    textElement.innerText = phrases[currentIndex];
+
+                    // 3. Smoothly animate the container width for "Enthusiast"
+                    // We use offsetWidth to get the exact pixel width of the new string
+                    container.style.width = textElement.offsetWidth + "px";
+
+                    // 4. Enter Animation (Slide Up from bottom)
+                    textElement.classList.remove("slide-up-exit");
+                    textElement.classList.add("slide-up-enter");
+                }, 600); // Wait for exit animation (0.6s) to complete
+            }
+
+            // Interval to cycle phrases every 3.5 seconds
+            setInterval(updateText, 3500);
+        });
+    </script>
+
+    <script>
+        class TextScrambler {
+            constructor(el) {
+                this.el = el;
+                this.chars = '!<>-_\\/[]{}—=+*^?#________';
+                this.update = this.update.bind(this);
+            }
+            setText(newText) {
+                const oldText = this.el.innerText;
+                const length = Math.max(oldText.length, newText.length);
+                const promise = new Promise((resolve) => (this.resolve = resolve));
+                this.queue = [];
+                for (let i = 0; i < length; i++) {
+                    const from = oldText[i] || '';
+                    const to = newText[i] || '';
+                    const start = Math.floor(Math.random() * 40);
+                    const end = start + Math.floor(Math.random() * 40);
+                    this.queue.push({ from, to, start, end });
+                }
+                cancelAnimationFrame(this.frameRequest);
+                this.frame = 0;
+                this.update();
+                return promise;
+            }
+            update() {
+                let output = '';
+                let complete = 0;
+
+                // Your custom color palette
+                const glitchColors = [
+                    // '#008040', // Green
+                    // '#d96c00', // Orange
+                    // '#ff00fe', // Pink
+                    // '#00ffff', // Cyan
+                    '#0b0bd9', // Blue
+                    // '#492b8c', // Deep Purple
+                    '#610533'  // Wine
+                ];
+
+                for (let i = 0, n = this.queue.length; i < n; i++) {
+                    let { from, to, start, end, char } = this.queue[i];
+
+                    if (this.frame >= end) {
+                        complete++;
+                        output += to;
+                    } else if (this.frame >= start) {
+                        if (!char || Math.random() < 0.28) {
+                            char = this.chars[Math.floor(Math.random() * this.chars.length)];
+                            this.queue[i].char = char;
+                        }
+
+                        // Randomly select a color from your list for this specific character
+                        const randomColor = glitchColors[Math.floor(Math.random() * glitchColors.length)];
+                        output += `<span style="color: ${randomColor}">${char}</span>`;
+                    } else {
+                        output += from;
+                    }
+                }
+
+                this.el.innerHTML = output;
+
+                if (complete === this.queue.length) {
+                    this.resolve();
+                } else {
+                    this.frameRequest = requestAnimationFrame(this.update);
+                    this.frame++;
+                }
+            }
+        }
+
+        // Initialization
+        document.addEventListener('DOMContentLoaded', () => {
+            const phrases = [
+                "Building the Future with Code",
+                "Engineering Clean, Maintainable Solutions",
+                "Building Systems That Scale",
+                "Secure by Design",
+                "Thinking Like an Attacker. Building Like a Defender.",
+                "I Build, Break, and Improve Systems",
+                "Curious. Analytical. Persistent.",
+                "Continuous Delivery Thinking",
+                "Adapt, Improve, Repeat"
+            ];
+
+            const el = document.getElementById('scramble-text');
+            const scrambler = new TextScrambler(el);
+            let counter = 0;
+
+            const next = () => {
+                scrambler.setText(phrases[counter]).then(() => {
+                    setTimeout(next, 3000); // Wait 3 seconds before next phrase
+                });
+                counter = (counter + 1) % phrases.length;
+            };
+
+            next();
+        });
+    </script>
+
     <style>
-        /* Custom scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
         }
@@ -73,7 +218,6 @@
             background: #555;
         }
 
-        /* Glassmorphism Utilities */
         .glass-panel {
             background: rgba(16, 16, 25, 0.4);
             backdrop-filter: blur(16px);
@@ -97,7 +241,6 @@
             box-shadow: 0 10px 40px -10px rgba(13, 13, 242, 0.2);
         }
 
-        /* Gradient Text */
         .text-gradient {
             background: linear-gradient(to right, #fff, #a5b4fc);
             -webkit-background-clip: text;
@@ -110,18 +253,59 @@
             -webkit-text-fill-color: transparent;
         }
 
-        /* Background Noise/Mesh */
         .bg-noise {
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
         }
 
-        /* Animated Orbs */
         .orb {
             position: absolute;
             border-radius: 50%;
             filter: blur(80px);
             z-index: -1;
             opacity: 0.4;
+        }
+
+        .slide-up-enter {
+            animation: slide-up-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .slide-up-exit {
+            animation: slide-up-out 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes slide-up-in {
+            from {
+                transform: translateY(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slide-up-out {
+            from {
+                transform: translateY(0);
+                opacity: 1;
+            }
+
+            to {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+        }
+
+        .animate-container {
+            display: inline-flex;
+            vertical-align: bottom;
+            overflow: hidden;
+            height: 1.23em;
+            /* Adjusted slightly for descenders like 'y' */
+            white-space: nowrap;
+            /* Prevents "Computing" from wrapping to a hidden line */
+            transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
     </style>
 </head>
@@ -132,10 +316,11 @@
     <!-- Ambient Background Effects -->
     <div class="fixed inset-0 z-[-1] overflow-hidden pointer-events-none">
         <div class="absolute inset-0 bg-noise opacity-30"></div>
-        <div class="orb w-[500px] h-[500px] bg-primary top-[-100px] left-[-100px] animate-pulse"></div>
-        <div class="orb w-[400px] h-[400px] bg-aurora-pink bottom-[10%] right-[-100px] opacity-20"></div>
+        <div class="orb w-[500px] h-[500px] bg-primary top-[-100px] left-[-100px] animate-orb-pulse"></div>
+        <div class="orb w-[450px] h-[450px] bg-aurora-pink bottom-[10%] right-[-100px] opacity-20 animate-orb-pulse">
+        </div>
         <div
-            class="orb w-[600px] h-[600px] bg-aurora-purple top-[40%] left-[50%] transform -translate-x-1/2 opacity-20">
+            class="orb w-[600px] h-[600px] bg-aurora-purple top-[40%] left-[50%] transform -translate-x-1/2 opacity-20 animate-orb-pulse">
         </div>
     </div>
 
@@ -157,7 +342,7 @@
             <div
                 class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300 absolute left-1/2 -translate-x-1/2">
                 <a class="hover:text-white transition-colors" href="#about">About</a>
-                <a class="hover:text-white transition-colors" href="#skills">Technical Stack</a>
+                <a class="hover:text-white transition-colors" href="#skills">Skills</a>
                 <a class="hover:text-white transition-colors" href="#projects">Projects</a>
                 <a class="hover:text-white transition-colors" href="#experience">Career</a>
                 <a class="hover:text-white transition-colors" href="#contact">Contact</a>
@@ -196,66 +381,78 @@
     </nav>
 
     <!-- Main Content Wrapper -->
-<main class="relative z-10 flex flex-col items-center w-full pt-32 px-4 sm:px-6">
-    
-    <section class="max-w-6xl w-full flex flex-col items-center py-16 sm:py-24 animate-fade-in-up">
-        
-        <div class="w-full flex flex-col md:flex-row items-center md:items-start justify-center gap-24 mb-16">
-            <div class="w-48 h-48 sm:w-64 sm:h-64 flex-shrink-0 rounded-full overflow-hidden border-4 border-white/10 shadow-2xl transition-all duration-500 hover:border-primary/50 relative group">
-                <img 
-                    src="./assets/images/profilePicture.png" 
-                    alt="Ishkar Singh" 
-                    class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
+    <main class="relative z-10 flex flex-col items-center w-full pt-32 px-4 sm:px-6">
+        <section class="max-w-6xl w-full flex flex-col items-center py-16 sm:py-24 animate-fade-in-up">
+
+            <div class="w-full flex flex-col md:flex-row items-center md:items-start justify-center gap-24 mb-16">
+                <div
+                    class="w-48 h-48 sm:w-64 sm:h-64 flex-shrink-0 rounded-full overflow-hidden border-4 border-white/10 shadow-2xl transition-all duration-500 hover:border-primary/50 relative group">
+                    <img src="./assets/images/profilePicture.png" alt="Ishkar Singh"
+                        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                </div>
+
+                <div class="flex flex-col items-center md:items-start text-center md:text-left max-w-[46rem]">
+                    <h1
+                        class="text-3xl sm:text-4xl lg:text-[52px] font-bold tracking-tight text-white leading-tight whitespace-nowrap">
+                        Bachelor of Computer Science
+                    </h1>
+
+                    <div class="w-full flex items-center gap-4 my-4">
+                        <span class="h-px flex-1 bg-white/20"></span>
+                    </div>
+
+                    <p
+                        class="text-2xl sm:text-4xl font-semibold tracking-tight flex flex-wrap items-baseline gap-x-2 mb-6">
+                        <span class="animate-container relative">
+                            <span id="sliding-text" class="inline-block text-gradient-aurora">Cloud Computing</span>
+                        </span>
+                        <span class="text-gradient-aurora">Enthusiast</span>
+                    </p>
+
+                    <p id="scramble-text"
+                        class="text-xl sm:text-2xl font-medium text-[#b3b3b3] mb-6 leading-relaxed min-h-[3em]">
+                        Building the Future with Code
+                    </p>
+
+                    <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+                        <a class="group relative px-8 py-3.5 bg-primary text-white font-semibold rounded-lg overflow-hidden transition-all hover:shadow-[0_0_40px_-10px_rgba(13,13,242,0.5)] flex items-center justify-center"
+                            href="#projects">
+                            <div
+                                class="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]">
+                            </div>
+                            <span>View Projects</span>
+                        </a>
+                        <a class="px-8 py-3.5 bg-white/5 border border-white/10 text-white font-semibold rounded-lg hover:bg-white/10 transition-all flex items-center justify-center gap-2"
+                            href="#contact">
+                            <span>Contact Me</span>
+                            <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                        </a>
+                    </div>
+                </div>
             </div>
 
-            <div class="flex flex-col items-center md:items-start text-center md:text-left max-w-2xl">
-                <h1 class="text-5xl sm:text-7xl font-bold tracking-tight text-white leading-[1.1]">
-                    Building the <br class="hidden sm:block" />
-                    <span class="text-gradient-aurora">Future with Code</span>
-                </h1>
-
-                <p class="text-lg sm:text-xl text-slate-400 mt-6 leading-relaxed">
-                    Hi, I'm Alex. A Full Stack Developer specializing in scalable systems, AI-driven solutions, and crafting immersive digital experiences.
-                </p>
-
-                <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto mt-8">
-                    <a class="group relative px-8 py-3.5 bg-primary text-white font-semibold rounded-lg overflow-hidden transition-all hover:shadow-[0_0_40px_-10px_rgba(13,13,242,0.5)] flex items-center justify-center"
-                        href="#projects">
-                        <div class="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"></div>
-                        <span>View Projects</span>
-                    </a>
-                    <a class="px-8 py-3.5 bg-white/5 border border-white/10 text-white font-semibold rounded-lg hover:bg-white/10 transition-all flex items-center justify-center gap-2"
-                        href="#contact">
-                        <span>Contact Me</span>
-                        <span class="material-symbols-outlined text-sm">arrow_forward</span>
-                    </a>
+            <!-- Stats / Social Proof -->
+            <div class="w-full max-w-5xl border-t border-white/5 pt-12">
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-8">
+                    <div class="flex flex-col items-center">
+                        <span class="text-2xl font-bold text-white">3+</span>
+                        <span class="text-xs text-slate-500 uppercase tracking-wider">Years Coding</span>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <span class="text-2xl font-bold text-white">20+</span>
+                        <span class="text-xs text-slate-500 uppercase tracking-wider">Projects</span>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <span class="text-2xl font-bold text-white">100%</span>
+                        <span class="text-xs text-slate-500 uppercase tracking-wider">Commitment</span>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <span class="text-2xl font-bold text-white">BS</span>
+                        <span class="text-xs text-slate-500 uppercase tracking-wider">Comp Sci</span>
+                    </div>
                 </div>
             </div>
-        </div>
-
-        <!-- Stats / Social Proof -->
-        <div class="w-full max-w-5xl border-t border-white/5 pt-12">
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-8">
-                <div class="flex flex-col items-center">
-                    <span class="text-2xl font-bold text-white">3+</span>
-                    <span class="text-xs text-slate-500 uppercase tracking-wider">Years Coding</span>
-                </div>
-                <div class="flex flex-col items-center">
-                    <span class="text-2xl font-bold text-white">20+</span>
-                    <span class="text-xs text-slate-500 uppercase tracking-wider">Projects</span>
-                </div>
-                <div class="flex flex-col items-center">
-                    <span class="text-2xl font-bold text-white">100%</span>
-                    <span class="text-xs text-slate-500 uppercase tracking-wider">Commitment</span>
-                </div>
-                <div class="flex flex-col items-center">
-                    <span class="text-2xl font-bold text-white">BS</span>
-                    <span class="text-xs text-slate-500 uppercase tracking-wider">Comp Sci</span>
-                </div>
-            </div>
-        </div>
-    </section>
+        </section>
 
         <!-- About Me Section -->
         <section class="max-w-5xl w-full py-16 scroll-mt-24" id="about">
@@ -288,7 +485,7 @@
         <section class="max-w-6xl w-full py-16 scroll-mt-24" id="skills">
             <div class="flex items-center gap-4 mb-10 px-2">
                 <span class="h-px flex-1 bg-gradient-to-r from-transparent to-white/20"></span>
-                <h2 class="text-3xl font-bold text-white">Technical Stack</h2>
+                <h2 class="text-3xl font-bold text-white">Technical Skills</h2>
                 <span class="h-px flex-1 bg-gradient-to-l from-transparent to-white/20"></span>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -518,7 +715,7 @@
         <section class="max-w-6xl w-full py-16 scroll-mt-24" id="experience">
             <div class="flex items-center gap-4 mb-10 px-2">
                 <span class="h-px flex-1 bg-gradient-to-r from-transparent to-white/20"></span>
-                <h2 class="text-3xl font-bold text-white">Career</h2>
+                <h2 class="text-3xl font-bold text-white">Professional Background</h2>
                 <span class="h-px flex-1 bg-gradient-to-l from-transparent to-white/20"></span>
             </div>
             <!-- <h2 class="text-3xl font-bold text-white mb-10 text-center">Featured Projects</h2> -->
@@ -628,8 +825,13 @@
 
         <!-- Contact Section -->
         <section class="max-w-2xl w-full py-20 scroll-mt-24" id="contact">
+            <div class="flex items-center gap-4 mb-10 px-2">
+                <span class="h-px flex-1 bg-gradient-to-r from-transparent to-white/20"></span>
+                <h2 class="text-3xl font-bold text-white">Let's Connect</h2>
+                <span class="h-px flex-1 bg-gradient-to-l from-transparent to-white/20"></span>
+            </div>
             <div class="glass-panel p-8 sm:p-12 rounded-2xl text-center">
-                <h2 class="text-3xl font-bold text-white mb-4">Let's Connect</h2>
+                <!-- <h2 class="text-3xl font-bold text-white mb-4">Let's Connect</h2> -->
                 <p class="text-slate-400 mb-8 max-w-md mx-auto">
                     Currently looking for new opportunities. Whether you have a question or just want to say hi, my
                     inbox is always open.
