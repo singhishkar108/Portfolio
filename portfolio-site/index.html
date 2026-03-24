@@ -20,7 +20,7 @@
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
         rel="stylesheet" />
 
-    <!-- Tailwind CSS -->
+    <!-- Tailwind CSS Orbs -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <script id="tailwind-config">
         tailwind.config = {
@@ -65,6 +65,7 @@
         };
     </script>
 
+    <!-- Text 'Enthusiast' Smooth Slide -->
     <script>
         window.addEventListener('load', () => {
             const phrases = ["Cloud Computing", "Cybersecurity", "Artificial Intelligence (AI)", "Software Development", "DevOps"];
@@ -101,6 +102,7 @@
         });
     </script>
 
+    <!-- Text Phrases Character Scramble -->
     <script>
         class TextScrambler {
             constructor(el) {
@@ -136,7 +138,7 @@
                     // '#ff00fe', // Pink
                     // '#00ffff', // Cyan
                     '#0b0bd9', // Blue
-                    // '#492b8c', // Deep Purple
+                    '#492b8c', // Deep Purple
                     '#610533'  // Wine
                 ];
 
@@ -191,7 +193,7 @@
 
             const next = () => {
                 scrambler.setText(phrases[counter]).then(() => {
-                    setTimeout(next, 3000); // Wait 3 seconds before next phrase
+                    setTimeout(next, 3250); // Wait 3 seconds before next phrase
                 });
                 counter = (counter + 1) % phrases.length;
             };
@@ -199,6 +201,106 @@
             next();
         });
     </script>
+
+    <!-- GitHub Projects -->
+<script>
+    // 1. Core Animation Logic
+    function animateValue(id, start, end, duration, suffix = "") {
+        const obj = document.getElementById(id);
+        if (!obj) return;
+        
+        let startTimestamp = null;
+        const step = (timestamp) => {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+            const currentCount = Math.floor(progress * (end - start) + start);
+            
+            obj.innerHTML = currentCount.toLocaleString() + suffix;
+            
+            if (progress < 1) {
+                window.requestAnimationFrame(step);
+            }
+        };
+        window.requestAnimationFrame(step);
+    }
+
+    // 2. State Management
+    let githubData = null;
+    let hasAnimated = false;
+
+    // 3. Coordinate the Reveal
+    function startAllAnimations() {
+        if (hasAnimated || !githubData) return;
+        hasAnimated = true;
+
+        // Years Coding (Calculated locally)
+        const startDate = new Date('2023-01-01');
+        const years = Math.floor((new Date() - startDate) / (1000 * 60 * 60 * 24 * 365.25));
+        
+        // Start all four simultaneously
+        animateValue('stat-years', 0, years, 2000, "+");
+        animateValue('stat-projects', 0, githubData.projectCount, 2000);
+        animateValue('stat-commits', 0, githubData.commitCount, 2000);
+        animateValue('stat-languages', 0, githubData.languageCount, 2000, "+");
+    }
+
+    async function fetchGitHubData() {
+        try {
+            const response = await fetch('/.netlify/functions/getGithubData');
+            if (!response.ok) throw new Error('API Error');
+            githubData = await response.json();
+            
+            // Populate grid immediately (hidden until scrolled to, or just static)
+            renderProjectGrid(githubData.recentProjects);
+            
+            // If the user is ALREADY looking at the stats when data arrives, start!
+            checkVisibilityAndStart();
+        } catch (err) {
+            console.error('Fetch Error:', err);
+            githubData = { projectCount: 15, commitCount: 500, languageCount: 5 }; // Fallbacks
+        }
+    }
+
+    function renderProjectGrid(projects) {
+        const container = document.getElementById('projects-grid');
+        if (!container || !projects) return;
+        container.innerHTML = '';
+        projects.forEach(repo => {
+            const card = document.createElement('div');
+            card.className = "p-6 bg-white/5 border border-white/10 rounded-xl hover:border-primary/50 transition-all duration-300 group";
+            card.innerHTML = `
+                <h3 class="text-white font-bold text-lg mb-2 group-hover:text-primary transition-colors">${repo.name}</h3>
+                <p class="text-gray-400 text-sm mb-6 line-clamp-2">${repo.description || 'Project details.'}</p>
+                <div class="flex items-center justify-between mt-auto">
+                    <span class="text-xs text-slate-500 uppercase tracking-widest">${repo.language || 'Code'}</span>
+                    <a href="${repo.html_url}" target="_blank" class="text-primary text-sm font-semibold flex items-center gap-1 hover:gap-2 transition-all">
+                        View Source <span class="material-symbols-outlined text-xs">arrow_forward</span>
+                    </a>
+                </div>`;
+            container.appendChild(card);
+        });
+    }
+
+    // 4. Scroll Detection (Intersection Observer)
+    function checkVisibilityAndStart() {
+        const statsSection = document.querySelector('.stats-container') || document.getElementById('stat-years').parentElement;
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    startAllAnimations();
+                }
+            });
+        }, { threshold: 0.2 }); // Trigger when 20% of the section is visible
+
+        if (statsSection) observer.observe(statsSection);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        fetchGitHubData();
+        checkVisibilityAndStart();
+    });
+</script>
 
     <style>
         ::-webkit-scrollbar {
@@ -384,7 +486,8 @@
     <main class="relative z-10 flex flex-col items-center w-full pt-32 px-4 sm:px-6">
         <section class="max-w-6xl w-full flex flex-col items-center py-16 sm:py-24 animate-fade-in-up">
 
-            <div class="w-full flex flex-col md:flex-row items-center md:items-start justify-center gap-24 mb-16">
+            <div class="w-full flex flex-col md:flex-row items-center md:items-center justify-center gap-24 mb-16">
+
                 <div
                     class="w-48 h-48 sm:w-64 sm:h-64 flex-shrink-0 rounded-full overflow-hidden border-4 border-white/10 shadow-2xl transition-all duration-500 hover:border-primary/50 relative group">
                     <img src="./assets/images/profilePicture.png" alt="Ishkar Singh"
@@ -402,7 +505,7 @@
                     </div>
 
                     <p
-                        class="text-2xl sm:text-4xl font-semibold tracking-tight flex flex-wrap items-baseline gap-x-2 mb-6">
+                        class="text-2xl sm:text-4xl font-semibold tracking-tight flex flex-wrap items-baseline gap-x-2 mb-4">
                         <span class="animate-container relative">
                             <span id="sliding-text" class="inline-block text-gradient-aurora">Cloud Computing</span>
                         </span>
@@ -410,11 +513,11 @@
                     </p>
 
                     <p id="scramble-text"
-                        class="text-xl sm:text-2xl font-medium text-[#b3b3b3] mb-6 leading-relaxed min-h-[3em]">
-                        Building the Future with Code
+                        class="text-xl sm:text-2xl font-medium text-[#a6a6a6] mb-4 leading-snug min-h-[1.5em]">
+                        Curious. Analytical. Persistent.
                     </p>
 
-                    <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+                    <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto mt-4">
                         <a class="group relative px-8 py-3.5 bg-primary text-white font-semibold rounded-lg overflow-hidden transition-all hover:shadow-[0_0_40px_-10px_rgba(13,13,242,0.5)] flex items-center justify-center"
                             href="#projects">
                             <div
@@ -435,20 +538,20 @@
             <div class="w-full max-w-5xl border-t border-white/5 pt-12">
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-8">
                     <div class="flex flex-col items-center">
-                        <span class="text-2xl font-bold text-white">3+</span>
+                        <span id="stat-years" class="text-2xl font-bold text-white">0</span>
                         <span class="text-xs text-slate-500 uppercase tracking-wider">Years Coding</span>
                     </div>
                     <div class="flex flex-col items-center">
-                        <span class="text-2xl font-bold text-white">20+</span>
+                        <span id="stat-projects" class="text-2xl font-bold text-white">0</span>
                         <span class="text-xs text-slate-500 uppercase tracking-wider">Projects</span>
                     </div>
                     <div class="flex flex-col items-center">
-                        <span class="text-2xl font-bold text-white">100%</span>
-                        <span class="text-xs text-slate-500 uppercase tracking-wider">Commitment</span>
+                        <span id="stat-commits" class="text-2xl font-bold text-white">0</span>
+                        <span class="text-xs text-slate-500 uppercase tracking-wider">Commits</span>
                     </div>
                     <div class="flex flex-col items-center">
-                        <span class="text-2xl font-bold text-white">BS</span>
-                        <span class="text-xs text-slate-500 uppercase tracking-wider">Comp Sci</span>
+                        <span id="stat-languages" class="text-2xl font-bold text-white">0</span>
+                        <span class="text-xs text-slate-500 uppercase tracking-wider">Languages</span>
                     </div>
                 </div>
             </div>
@@ -472,105 +575,129 @@
                 <div class="relative z-10">
                     <!-- <h2 class="text-2xl font-bold text-white mb-4">About Me</h2> -->
                     <p class="text-slate-300 leading-relaxed text-lg">
-                        I am a recent Computer Science graduate with a strong foundation in algorithms and data
-                        structures. My passion lies in solving complex problems and turning abstract ideas into robust,
-                        scalable software. I thrive in collaborative environments where I can leverage my technical
-                        skills to drive innovation.
+I am a recent Bachelor of Computer and Information Sciences graduate with a strong foundation in software development and broad technical interests across cybersecurity, cloud computing, and artificial intelligence. I have hands-on experience developing full-stack, production-ready applications using .NET, C#, HTML, Java, JavaScript, SQL, and React, gained through academic projects and Agile team environments. I am a highly motivated learner with a strong commitment to skill development, industry certifications, and continuous professional growth. If you’re looking for a driven, adaptable, and enthusiastic individual with a passion for technology and continuous learning, I’d love to connect and explore how I can contribute to your team!
                     </p>
                 </div>
             </div>
         </section>
 
         <!-- Skills Section -->
-        <section class="max-w-6xl w-full py-16 scroll-mt-24" id="skills">
-            <div class="flex items-center gap-4 mb-10 px-2">
-                <span class="h-px flex-1 bg-gradient-to-r from-transparent to-white/20"></span>
-                <h2 class="text-3xl font-bold text-white">Technical Skills</h2>
-                <span class="h-px flex-1 bg-gradient-to-l from-transparent to-white/20"></span>
+<section class="max-w-6xl w-full py-16 scroll-mt-24" id="skills">
+    <div class="flex items-center gap-4 mb-10 px-2">
+        <span class="h-px flex-1 bg-gradient-to-r from-transparent to-white/20"></span>
+        <h2 class="text-3xl font-bold text-white">Technical Skills</h2>
+        <span class="h-px flex-1 bg-gradient-to-l from-transparent to-white/20"></span>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="glass-card p-6 rounded-xl border border-white/10 bg-white/5">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="p-2 bg-blue-500/10 rounded-lg text-blue-400">
+                    <span class="material-symbols-outlined">code</span>
+                </div>
+                <h3 class="text-lg font-semibold text-white">Programming Languages</h3>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-                <!-- Languages -->
-                <div class="glass-card p-6 rounded-xl">
-                    <div class="flex items-center gap-3 mb-6">
-                        <div class="p-2 bg-blue-500/10 rounded-lg text-blue-400">
-                            <span class="material-symbols-outlined">code</span>
-                        </div>
-                        <h3 class="text-lg font-semibold text-white">Languages</h3>
-                    </div>
-                    <div class="flex flex-wrap gap-2">
-                        <span
-                            class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">JavaScript
-                            (ES6+)</span>
-                        <span
-                            class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">TypeScript</span>
-                        <span
-                            class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">Python</span>
-                        <span
-                            class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">Java</span>
-                        <span
-                            class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">C++</span>
-                        <span
-                            class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">SQL</span>
-                    </div>
-                </div>
-
-                <!-- Frameworks & Tools -->
-                <div class="glass-card p-6 rounded-xl">
-                    <div class="flex items-center gap-3 mb-6">
-                        <div class="p-2 bg-purple-500/10 rounded-lg text-purple-400">
-                            <span class="material-symbols-outlined">layers</span>
-                        </div>
-                        <h3 class="text-lg font-semibold text-white">Frameworks &amp; Tools</h3>
-                    </div>
-                    <div class="flex flex-wrap gap-2">
-                        <span
-                            class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">React.js</span>
-                        <span
-                            class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">Next.js</span>
-                        <span
-                            class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">Node.js</span>
-                        <span
-                            class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">Tailwind
-                            CSS</span>
-                        <span
-                            class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">Docker</span>
-                        <span
-                            class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">Git/GitHub</span>
-                        <span
-                            class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">AWS
-                            (EC2, S3)</span>
-                    </div>
-                </div>
-
-                <!-- CS Concepts -->
-                <div class="glass-card p-6 rounded-xl">
-                    <div class="flex items-center gap-3 mb-6">
-                        <div class="p-2 bg-pink-500/10 rounded-lg text-pink-400">
-                            <span class="material-symbols-outlined">psychology</span>
-                        </div>
-                        <h3 class="text-lg font-semibold text-white">Concepts</h3>
-                    </div>
-                    <div class="flex flex-wrap gap-2">
-                        <span
-                            class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">Data
-                            Structures</span>
-                        <span
-                            class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">Algorithms</span>
-                        <span
-                            class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">System
-                            Design</span>
-                        <span
-                            class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">RESTful
-                            APIs</span>
-                        <span
-                            class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">Agile/Scrum</span>
-                        <span
-                            class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">CI/CD</span>
-                    </div>
-                </div>
+            <div class="flex flex-wrap gap-2">
+                <span class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">C#</span>
+                <span class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">Java</span>
+                <span class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">JavaScript</span>
+                <span class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">SQL</span>
+                <span class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">HTML</span>
+                <span class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">CSS (Tailwind)</span>
             </div>
-        </section>
+        </div>
+
+        <div class="glass-card p-6 rounded-xl border border-white/10 bg-white/5">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="p-2 bg-purple-500/10 rounded-lg text-purple-400">
+                    <span class="material-symbols-outlined">layers</span>
+                </div>
+                <h3 class="text-lg font-semibold text-white">Frameworks & Libraries</h3>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <span class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">ASP.NET</span>
+                <span class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">MERN Stack</span>
+                <span class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">React</span>
+                <span class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">Vue.js</span>
+                <span class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">WPF</span>
+            </div>
+        </div>
+
+        <div class="glass-card p-6 rounded-xl border border-white/10 bg-white/5">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="p-2 bg-emerald-500/10 rounded-lg text-emerald-400">
+                    <span class="material-symbols-outlined">database</span>
+                </div>
+                <h3 class="text-lg font-semibold text-white">Databases</h3>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <span class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">MySQL</span>
+                <span class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">MS SQL Server</span>
+                <span class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">MongoDB</span>
+                <span class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">Oracle SQL</span>
+            </div>
+        </div>
+
+        <div class="glass-card p-6 rounded-xl border border-white/10 bg-white/5">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="p-2 bg-orange-500/10 rounded-lg text-orange-400">
+                    <span class="material-symbols-outlined">cloud_done</span>
+                </div>
+                <h3 class="text-lg font-semibold text-white">Cloud & DevOps</h3>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <span class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">Microsoft Azure</span>
+                <span class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">Docker</span>
+                <span class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">CI/CD</span>
+                <span class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">GitHub Actions</span>
+            </div>
+        </div>
+
+        <div class="glass-card p-6 rounded-xl border border-white/10 bg-white/5">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="p-2 bg-pink-500/10 rounded-lg text-pink-400">
+                    <span class="material-symbols-outlined">api</span>
+                </div>
+                <h3 class="text-lg font-semibold text-white">APIs & Tools</h3>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <span class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">RESTful APIs</span>
+                <span class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">Postman</span>
+                <span class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">Swagger</span>
+            </div>
+        </div>
+
+        <div class="glass-card p-6 rounded-xl border border-white/10 bg-white/5">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="p-2 bg-cyan-500/10 rounded-lg text-cyan-400">
+                    <span class="material-symbols-outlined">terminal</span>
+                </div>
+                <h3 class="text-lg font-semibold text-white">Development Tools</h3>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <span class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">Git/GitHub</span>
+                <span class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">Visual Studio</span>
+                <span class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">VS Code</span>
+                <span class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">NetBeans</span>
+                <span class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">Linux</span>
+            </div>
+        </div>
+
+        <div class="glass-card p-6 rounded-xl border border-white/10 bg-white/5 lg:col-span-3">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="p-2 bg-yellow-500/10 rounded-lg text-yellow-400">
+                    <span class="material-symbols-outlined">history_edu</span>
+                </div>
+                <h3 class="text-lg font-semibold text-white">Software Engineering Practices</h3>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <span class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">Agile (Scrum)</span>
+                <span class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">SDLC</span>
+                <span class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">Technical Documentation</span>
+            </div>
+        </div>
+    </div>
+</section>
 
         <!-- Featured Projects -->
         <section class="max-w-5xl w-full py-16 scroll-mt-24" id="projects">
@@ -904,7 +1031,7 @@
                 &copy; <span id="year">2026</span> Ishkar Singh. All rights reserved.
             </p>
             <p class="text-xs text-slate-600">
-                Powered by the GitHub &amp; Brevo REST APIs
+                Powered by the GitHub &amp; Brevo APIs
             </p>
         </div>
     </footer>
