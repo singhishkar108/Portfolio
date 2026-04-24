@@ -340,6 +340,222 @@
         });
     </script>
 
+<!-- Featured Projects -->
+<script>
+ /* Handles: API Fetch, Filter/Sort State, Pagination, View Toggling*/
+document.addEventListener('DOMContentLoaded', () => {
+    // --- Configuration & State ---
+    let allProjects = [];
+    let filteredProjects = [];
+    let currentPage = 1;
+    let viewMode = 'card'; // 'card' or 'list'
+    
+    const CONFIG = {
+        cardPageSize: 6,
+        listPageSize: 10,
+        shimmerCount: 6
+    };
+
+    // --- Selectors ---
+    const elements = {
+        search: document.getElementById('project-search'),
+        langFilter: document.getElementById('lang-filter'),
+        sortSelect: document.getElementById('sort-select'),
+        forkToggle: document.getElementById('fork-toggle'),
+        viewToggle: document.getElementById('view-toggle'), // Checkbox/Slider
+        container: document.getElementById('projects-display-area'),
+        pagination: document.getElementById('pagination-controls')
+    };
+
+    // --- 1. Fetch Data ---
+    async function initProjects() {
+        showShimmer();
+        try {
+            const response = await fetch('/.netlify/functions/getGithubData');
+            const data = await response.json();
+            allProjects = data.projects || [];
+            
+            // Populate Language Dropdown
+            populateLanguages(data.allLanguages);
+            
+            applyFilters(); 
+        } catch (err) {
+            console.error("Failed to load projects:", err);
+            elements.container.innerHTML = `<p class="text-red-400">Error loading projects. Please try again later.</p>`;
+        }
+    }
+
+    // --- 2. Filter & Sort Logic ---
+    function applyFilters() {
+        const searchTerm = elements.search.value.toLowerCase();
+        const selectedLang = elements.langFilter.value;
+        const showForks = elements.forkToggle.checked;
+        const sortBy = elements.sortSelect.value;
+
+        filteredProjects = allProjects.filter(project => {
+            const matchesSearch = project.name.toLowerCase().includes(searchTerm) || 
+                                 (project.description && project.description.toLowerCase().includes(searchTerm));
+            const matchesLang = selectedLang === 'all' || project.all_languages.includes(selectedLang);
+            const matchesFork = showForks ? true : !project.isFork;
+
+            return matchesSearch && matchesLang && matchesFork;
+        });
+
+        // Sorting
+        filteredProjects.sort((a, b) => {
+            if (sortBy === 'recent') return new Date(b.updated_at) - new Date(a.updated_at);
+            if (sortBy === 'az') return a.name.localeCompare(b.name);
+            if (sortBy === 'commits') return b.commit_count - a.commit_count;
+            return 0;
+        });
+
+        currentPage = 1;
+        render();
+    }
+
+    // --- 3. Rendering Logic ---
+    function render() {
+        const pageSize = viewMode === 'card' ? CONFIG.cardPageSize : CONFIG.listPageSize;
+        const startIndex = (currentPage - 1) * pageSize;
+        const paginatedItems = filteredProjects.slice(startIndex, startIndex + pageSize);
+
+        if (viewMode === 'card') {
+            renderCardView(paginatedItems);
+        } else {
+            renderListView(paginatedItems);
+        }
+
+        renderPagination(Math.ceil(filteredProjects.length / pageSize));
+    }
+
+    function renderCardView(projects) {
+        elements.container.className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6";
+        elements.container.innerHTML = projects.map(project => `
+            <div class="glass-panel p-6 rounded-xl hover:translate-y-[-5px] transition-all duration-300 border border-white/5 hover:border-primary/50 group relative overflow-hidden">
+                <div class="flex flex-col h-full">
+                    <h3 class="text-white font-bold text-xl mb-2">${project.name}</h3>
+                    <p class="text-slate-400 text-sm mb-4 flex-grow line-clamp-3">${project.description || 'No description provided.'}</p>
+                    
+                    <div class="flex flex-wrap gap-2 mb-6">
+                        ${project.all_languages.map(lang => `<span class="px-2 py-1 text-[10px] bg-primary/10 text-primary rounded-md border border-primary/20 uppercase font-medium">${lang}</span>`).join('')}
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-y-3 pt-4 border-t border-white/10 text-xs text-slate-500">
+                        <div class="flex items-center gap-2"><span class="material-symbols-outlined text-sm">history</span> ${project.commit_count} Commits</div>
+                        <div class="flex items-center gap-2"><span class="material-symbols-outlined text-sm">star</span> ${project.stars} Stars</div>
+                        <div class="flex items-center gap-2"><span class="material-symbols-outlined text-sm">fork_right</span> ${project.forks} Forks</div>
+                        <div class="flex items-center gap-2"><span class="material-symbols-outlined text-sm">update</span> ${new Date(project.updated_at).toLocaleDateString()}</div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function renderListView(projects) {
+        elements.container.className = "overflow-x-auto w-full glass-panel rounded-xl";
+        elements.container.innerHTML = `
+            <table class="w-full text-left border-collapse">
+                <thead class="bg-white/5 text-slate-300 text-sm uppercase">
+                    <tr>
+                        <th class="p-4">Project</th>
+                        <th class="p-4">Languages</th>
+                        <th class="p-4">Stats</th>
+                        <th class="p-4 text-right">Updated</th>
+                    </tr>
+                </thead>
+                <tbody class="text-slate-400">
+                    ${projects.map(p => `
+                        <tr class="border-t border-white/5 hover:bg-white/[0.02] transition-colors">
+                            <td class="p-4">
+                                <div class="font-bold text-white">${p.name}</div>
+                                <div class="text-xs truncate max-w-[200px]">${p.description || ''}</div>
+                            </td>
+                            <td class="p-4">
+                                <div class="flex gap-1">${p.all_languages.slice(0,3).map(l => `<span class="text-[10px] text-primary">${l}</span>`).join(', ')}</div>
+                            </td>
+                            <td class="p-4 text-xs">
+                                ${p.commit_count}C | ${p.stars}S | ${p.forks}F
+                            </td>
+                            <td class="p-4 text-right text-xs">${new Date(p.updated_at).toLocaleDateString()}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        `;
+    }
+
+    // --- 4. Pagination & Helpers ---
+    function renderPagination(totalPages) {
+        if (totalPages <= 1) {
+            elements.pagination.innerHTML = '';
+            return;
+        }
+
+        let dots = '';
+        for (let i = 1; i <= totalPages; i++) {
+            const isActive = i === currentPage;
+            dots += `
+                <button onclick="changePage(${i})" class="w-8 h-8 rounded-full transition-all duration-300 flex items-center justify-center 
+                ${isActive ? 'bg-primary text-white scale-110 font-bold' : 'bg-white/10 text-slate-500 hover:bg-white/20'}">
+                    ${i}
+                </button>
+            `;
+        }
+
+        elements.pagination.innerHTML = `
+            <div class="flex items-center gap-4 mt-10 justify-center">
+                <button onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''} class="p-2 rounded-full hover:bg-primary/20 text-white disabled:opacity-30 transition-all">
+                    <span class="material-symbols-outlined">chevron_left</span>
+                </button>
+                <div class="flex gap-2">${dots}</div>
+                <button onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''} class="p-2 rounded-full hover:bg-primary/20 text-white disabled:opacity-30 transition-all">
+                    <span class="material-symbols-outlined">chevron_right</span>
+                </button>
+            </div>
+        `;
+    }
+
+    window.changePage = (page) => {
+        currentPage = page;
+        render();
+        elements.container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+
+    function showShimmer() {
+        elements.container.className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6";
+        elements.container.innerHTML = Array(CONFIG.shimmerCount).fill(0).map(() => `
+            <div class="glass-panel p-6 rounded-xl h-[300px] animate-pulse bg-white/5">
+                <div class="h-6 w-3/4 bg-white/10 rounded mb-4"></div>
+                <div class="h-4 w-full bg-white/10 rounded mb-2"></div>
+                <div class="h-4 w-5/6 bg-white/10 rounded mb-6"></div>
+                <div class="flex gap-2 mt-auto">
+                    <div class="h-5 w-12 bg-white/10 rounded"></div>
+                    <div class="h-5 w-12 bg-white/10 rounded"></div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function populateLanguages(langs) {
+        elements.langFilter.innerHTML = '<option value="all">All Languages</option>' + 
+            langs.map(l => `<option value="${l}">${l}</option>`).join('');
+    }
+
+    // --- 5. Event Listeners ---
+    elements.search.addEventListener('input', applyFilters);
+    elements.langFilter.addEventListener('change', applyFilters);
+    elements.sortSelect.addEventListener('change', applyFilters);
+    elements.forkToggle.addEventListener('change', applyFilters);
+    elements.viewToggle.addEventListener('change', (e) => {
+        viewMode = e.target.checked ? 'list' : 'card';
+        currentPage = 1;
+        render();
+    });
+
+    initProjects();
+});
+</script>
+
     <style>
         ::-webkit-scrollbar {
             width: 8px;
@@ -446,6 +662,75 @@
             white-space: nowrap;
             /* Prevents "Computing" from wrapping to a hidden line */
             transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+
+            /* Custom View Toggle Slider */
+.view-toggle-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 4px;
+    border-radius: 99px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+}
+
+.switch input { opacity: 0; width: 0; height: 0; }
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(255, 255, 255, 0.1);
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 18px; width: 18px;
+    left: 3px; bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider { background-color: #3b82f6; }
+input:checked + .slider:before { transform: translateX(26px); }
+
+/* Custom Form Elements */
+.project-input {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 8px;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.project-input:focus {
+    border-color: #3b82f6;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+/* Table Styling for List View */
+.projects-table th {
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.projects-table td {
+    padding: 16px;
+    vertical-align: middle;
+}
         }
     </style>
 </head>
@@ -776,17 +1061,54 @@
         </section>
 
         <!-- Featured Projects -->
-        <section class="max-w-5xl w-full py-16 scroll-mt-24" id="projects">
-            <div class="flex items-center gap-4 mb-10 px-2">
-                <span class="h-px flex-1 bg-gradient-to-r from-transparent to-white/20"></span>
-                <h2 class="text-3xl font-bold text-white">Featured Projects</h2>
-                <span class="h-px flex-1 bg-gradient-to-l from-transparent to-white/20"></span>
-            </div>
-            <!-- <h2 class="text-3xl font-bold text-white mb-10 text-center">Featured Projects</h2> -->
-            <div class="flex flex-col gap-8">
+<section class="max-w-6xl w-full py-16 scroll-mt-24" id="projects">
+    <div class="flex items-center gap-4 mb-10 px-2">
+        <span class="h-px flex-1 bg-gradient-to-r from-transparent to-white/20"></span>
+        <h2 class="text-3xl font-bold text-white">Featured Projects</h2>
+        <span class="h-px flex-1 bg-gradient-to-l from-transparent to-white/20"></span>
+    </div>
 
+    <div class="glass-panel p-6 rounded-2xl mb-8 flex flex-wrap items-center justify-between gap-6">
+        <div class="flex flex-wrap items-center gap-4 flex-grow lg:flex-nowrap">
+            <div class="relative flex-grow max-w-md">
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">search</span>
+                <input type="text" id="project-search" placeholder="Search projects..." 
+                       class="project-input w-full pl-10 text-sm">
             </div>
-        </section>
+            <select id="lang-filter" class="project-input text-sm min-w-[140px]">
+                <option value="all">All Languages</option>
+                </select>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-6">
+            <select id="sort-select" class="project-input text-sm">
+                <option value="recent">Recently Updated</option>
+                <option value="az">A-Z</option>
+                <option value="commits">Most Commits</option>
+            </select>
+
+            <label class="flex items-center gap-2 cursor-pointer text-slate-400 text-sm group">
+                <input type="checkbox" id="fork-toggle" class="accent-primary">
+                <span class="group-hover:text-white transition-colors">Include Forks</span>
+            </label>
+
+            <div class="view-toggle-container">
+                <span class="material-symbols-outlined text-sm text-slate-400">grid_view</span>
+                <label class="switch">
+                    <input type="checkbox" id="view-toggle">
+                    <span class="slider"></span>
+                </label>
+                <span class="material-symbols-outlined text-sm text-slate-400">list</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="projects-display-area" class="min-h-[400px]">
+        </div>
+
+    <div id="pagination-controls" class="mt-12">
+        </div>
+</section>
 
         <!-- Experience & Education -->
         <section class="max-w-6xl w-full py-16 scroll-mt-24" id="experience">
