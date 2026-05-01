@@ -295,7 +295,7 @@
                 checkVisibilityAndStart();
             } catch (err) {
                 console.error('Fetch Error:', err);
-                githubData = { projectCount: 15, commitCount: 500, languageCount: 5 }; // Fallbacks
+                githubData = { projectCount: 0, commitCount: 0, languageCount: 0 }; // Fallbacks
             }
         }
 
@@ -340,223 +340,283 @@
         });
     </script>
 
-<!-- Featured Projects -->
-<script>
- /* Handles: API Fetch, Filter/Sort State, Pagination, View Toggling*/
-document.addEventListener('DOMContentLoaded', () => {
-    // --- Configuration & State ---
-    let allProjects = [];
-    let filteredProjects = [];
-    let currentPage = 1;
-    let viewMode = 'card'; // 'card' or 'list'
-    
-    const CONFIG = {
-        cardPageSize: 6,
-        listPageSize: 10,
-        shimmerCount: 6
-    };
+    <!-- Featured Projects -->
+    <script>
+        /* Handles: API Fetch, Filter/Sort State, Pagination, View Toggling */
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Configuration & State ---
+            let allProjects = [];
+            let filteredProjects = [];
+            let currentPage = 1;
+            let viewMode = 'card'; // 'card' or 'list'
 
-    // --- Selectors ---
-    const elements = {
-        search: document.getElementById('project-search'),
-        langFilter: document.getElementById('lang-filter'),
-        sortSelect: document.getElementById('sort-select'),
-        forkToggle: document.getElementById('fork-toggle'),
-        viewToggle: document.getElementById('view-toggle'), // Checkbox/Slider
-        container: document.getElementById('projects-display-area'),
-        pagination: document.getElementById('pagination-controls')
-    };
+            const CONFIG = {
+                cardPageSize: 6,
+                listPageSize: 10,
+                shimmerCount: 6
+            };
 
-    // --- 1. Fetch Data ---
-    async function initProjects() {
-        showShimmer();
-        try {
-            const response = await fetch('/.netlify/functions/getGithubData');
-            const data = await response.json();
-            allProjects = data.projects || [];
-            
-            // Populate Language Dropdown
-            populateLanguages(data.allLanguages);
-            
-            applyFilters(); 
-        } catch (err) {
-            console.error("Failed to load projects:", err);
-            elements.container.innerHTML = `<p class="text-red-400">Error loading projects. Please try again later.</p>`;
-        }
-    }
+            // --- Selectors ---
+            const elements = {
+                search: document.getElementById('project-search'),
+                langFilter: document.getElementById('lang-filter'),
+                sortSelect: document.getElementById('sort-select'),
+                forkToggle: document.getElementById('fork-toggle'),
+                // Matches the pill-style slider container
+                viewTogglePill: document.getElementById('view-toggle-pill'),
+                container: document.getElementById('projects-display-area'),
+                pagination: document.getElementById('pagination-controls'),
+                forkCountBadge: document.getElementById('fork-count')
+            };
 
-    // --- 2. Filter & Sort Logic ---
-    function applyFilters() {
-        const searchTerm = elements.search.value.toLowerCase();
-        const selectedLang = elements.langFilter.value;
-        const showForks = elements.forkToggle.checked;
-        const sortBy = elements.sortSelect.value;
+            // --- 1. Fetch Data ---
+            async function initProjects() {
+                showShimmer();
+                try {
+                    const response = await fetch('/.netlify/functions/getGithubData');
+                    const data = await response.json();
+                    allProjects = data.projects || [];
 
-        filteredProjects = allProjects.filter(project => {
-            const matchesSearch = project.name.toLowerCase().includes(searchTerm) || 
-                                 (project.description && project.description.toLowerCase().includes(searchTerm));
-            const matchesLang = selectedLang === 'all' || project.all_languages.includes(selectedLang);
-            const matchesFork = showForks ? true : !project.isFork;
+                    // Populate Language Dropdown
+                    populateLanguages(data.allLanguages);
 
-            return matchesSearch && matchesLang && matchesFork;
-        });
+                    // Update the "Include Forks" count badge
+                    updateForkBadge();
 
-        // Sorting
-        filteredProjects.sort((a, b) => {
-            if (sortBy === 'recent') return new Date(b.updated_at) - new Date(a.updated_at);
-            if (sortBy === 'az') return a.name.localeCompare(b.name);
-            if (sortBy === 'commits') return b.commit_count - a.commit_count;
-            return 0;
-        });
+                    applyFilters();
+                } catch (err) {
+                    console.error("Failed to load projects:", err);
+                    elements.container.innerHTML = `<p class="text-red-400 text-center py-10">Error loading projects. Please try again later.</p>`;
+                }
+            }
 
-        currentPage = 1;
-        render();
-    }
+            // --- 2. Filter & Sort Logic ---
+            function applyFilters() {
+                const searchTerm = elements.search.value.toLowerCase();
+                const selectedLang = elements.langFilter.value;
+                const showForks = elements.forkToggle.checked;
+                const sortBy = elements.sortSelect.value;
 
-    // --- 3. Rendering Logic ---
-    function render() {
-        const pageSize = viewMode === 'card' ? CONFIG.cardPageSize : CONFIG.listPageSize;
-        const startIndex = (currentPage - 1) * pageSize;
-        const paginatedItems = filteredProjects.slice(startIndex, startIndex + pageSize);
+                filteredProjects = allProjects.filter(project => {
+                    const matchesSearch = project.name.toLowerCase().includes(searchTerm) ||
+                        (project.description && project.description.toLowerCase().includes(searchTerm));
+                    const matchesLang = selectedLang === 'all' || project.all_languages.includes(selectedLang);
+                    const matchesFork = showForks ? true : !project.isFork;
 
-        if (viewMode === 'card') {
-            renderCardView(paginatedItems);
-        } else {
-            renderListView(paginatedItems);
-        }
+                    return matchesSearch && matchesLang && matchesFork;
+                });
 
-        renderPagination(Math.ceil(filteredProjects.length / pageSize));
-    }
+                // Sorting
+                filteredProjects.sort((a, b) => {
+                    if (sortBy === 'recent') return new Date(b.updated_at) - new Date(a.updated_at);
+                    if (sortBy === 'az') return a.name.localeCompare(b.name);
+                    if (sortBy === 'commits') return (b.commit_count || 0) - (a.commit_count || 0);
+                    return 0;
+                });
 
-    function renderCardView(projects) {
-        elements.container.className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6";
-        elements.container.innerHTML = projects.map(project => `
-            <div class="glass-panel p-6 rounded-xl hover:translate-y-[-5px] transition-all duration-300 border border-white/5 hover:border-primary/50 group relative overflow-hidden">
-                <div class="flex flex-col h-full">
-                    <h3 class="text-white font-bold text-xl mb-2">${project.name}</h3>
-                    <p class="text-slate-400 text-sm mb-4 flex-grow line-clamp-3">${project.description || 'No description provided.'}</p>
-                    
-                    <div class="flex flex-wrap gap-2 mb-6">
-                        ${project.all_languages.map(lang => `<span class="px-2 py-1 text-[10px] bg-primary/10 text-primary rounded-md border border-primary/20 uppercase font-medium">${lang}</span>`).join('')}
-                    </div>
+                currentPage = 1;
+                render();
+            }
 
-                    <div class="grid grid-cols-2 gap-y-3 pt-4 border-t border-white/10 text-xs text-slate-500">
-                        <div class="flex items-center gap-2"><span class="material-symbols-outlined text-sm">history</span> ${project.commit_count} Commits</div>
-                        <div class="flex items-center gap-2"><span class="material-symbols-outlined text-sm">star</span> ${project.stars} Stars</div>
-                        <div class="flex items-center gap-2"><span class="material-symbols-outlined text-sm">fork_right</span> ${project.forks} Forks</div>
-                        <div class="flex items-center gap-2"><span class="material-symbols-outlined text-sm">update</span> ${new Date(project.updated_at).toLocaleDateString()}</div>
-                    </div>
-                </div>
+            // --- 3. Rendering Logic ---
+            function render() {
+                const pageSize = viewMode === 'card' ? CONFIG.cardPageSize : CONFIG.listPageSize;
+                const startIndex = (currentPage - 1) * pageSize;
+                const paginatedItems = filteredProjects.slice(startIndex, startIndex + pageSize);
+
+                if (viewMode === 'card') {
+                    renderCardView(paginatedItems);
+                } else {
+                    renderListView(paginatedItems);
+                }
+
+                renderPagination(Math.ceil(filteredProjects.length / pageSize));
+            }
+
+function renderCardView(projects) {
+    elements.container.className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6";
+    elements.container.innerHTML = projects.map((project, index) => `
+    <div class="glass-panel p-6 rounded-xl hover:translate-y-[-5px] transition-all duration-300 border border-white/10 hover-glow-primary group relative overflow-hidden animate-slide"
+         style="animation-delay: ${index * 0.1}s">
+        <div class="flex flex-col h-full">
+            <h3 class="mb-2">
+                <a href="${project.html_url}" target="_blank" 
+                   class="text-white font-bold text-xl hover:underline decoration-white decoration-2 underline-offset-4 transition-all">
+                    ${project.name}
+                </a>
+            </h3>
+            <p class="text-slate-400 text-sm mb-4 flex-grow ${!project.description ? 'italic' : 'not-italic'}">
+                ${project.description || 'No description provided.'}
+            </p>
+            <div class="flex flex-wrap gap-2 mb-6">
+                ${project.all_languages.map(lang => `
+                    <span class="px-2 py-1 text-[10px] bg-transparent text-white rounded-md border-2 border-primary/50 uppercase font-bold tracking-wider">
+                        ${lang}
+                    </span>`).join('')}
             </div>
-        `).join('');
-    }
+            <div class="grid grid-cols-2 gap-y-3 pt-4 border-t border-white/10 text-xs text-slate-500">
+                <div class="flex items-center gap-2"><span class="material-symbols-outlined text-sm">history</span> ${project.commit_count || 0} Commits</div>
+                <div class="flex items-center gap-2"><span class="material-symbols-outlined text-sm">star</span> ${project.stars || 0} Stars</div>
+                <div class="flex items-center gap-2"><span class="material-symbols-outlined text-sm">fork_right</span> ${project.forks || 0} Forks</div>
+                <div class="flex items-center gap-2"><span class="material-symbols-outlined text-sm">update</span> ${new Date(project.updated_at).toLocaleDateString()}</div>
+            </div>
+        </div>
+    </div>
+`).join('');
+}
 
-    function renderListView(projects) {
-        elements.container.className = "overflow-x-auto w-full glass-panel rounded-xl";
-        elements.container.innerHTML = `
-            <table class="w-full text-left border-collapse">
-                <thead class="bg-white/5 text-slate-300 text-sm uppercase">
-                    <tr>
-                        <th class="p-4">Project</th>
-                        <th class="p-4">Languages</th>
-                        <th class="p-4">Stats</th>
-                        <th class="p-4 text-right">Updated</th>
-                    </tr>
-                </thead>
-                <tbody class="text-slate-400">
-                    ${projects.map(p => `
-                        <tr class="border-t border-white/5 hover:bg-white/[0.02] transition-colors">
-                            <td class="p-4">
-                                <div class="font-bold text-white">${p.name}</div>
-                                <div class="text-xs truncate max-w-[200px]">${p.description || ''}</div>
-                            </td>
-                            <td class="p-4">
-                                <div class="flex gap-1">${p.all_languages.slice(0,3).map(l => `<span class="text-[10px] text-primary">${l}</span>`).join(', ')}</div>
-                            </td>
-                            <td class="p-4 text-xs">
-                                ${p.commit_count}C | ${p.stars}S | ${p.forks}F
-                            </td>
-                            <td class="p-4 text-right text-xs">${new Date(p.updated_at).toLocaleDateString()}</td>
-                        </tr>
-                    `).join('')}
-                </tbody>
-            </table>
-        `;
-    }
+function renderListView(projects) {
+    elements.container.className = "overflow-x-auto w-full glass-panel rounded-xl border border-primary/5";
+    elements.container.innerHTML = `
+    <table class="w-full text-left border-collapse">
+        <thead class="bg-white/5 text-slate-300 text-sm uppercase">
+            <tr>
+                <th class="p-4">Project</th>
+                <th class="p-4">Languages</th>
+                <th class="p-4">Stats</th>
+                <th class="p-4 text-right">Updated</th>
+            </tr>
+        </thead>
+        <tbody class="text-slate-400">
+            ${projects.map((p, index) => `
+                <tr class="border-t border-white/5 hover:bg-white/[0.02] transition-colors animate-slide"
+                    style="animation-delay: ${index * 0.06}s">
+                    <td class="p-4">
+                        <div class="font-bold">
+                            <a href="${p.html_url}" target="_blank" 
+                               class="text-white hover:underline decoration-white decoration-2 underline-offset-2 transition-all">
+                                ${p.name}
+                            </a>
+                        </div>
+                        <div class="text-xs text-slate-500 mt-1 ${!p.description ? 'italic' : 'not-italic'}">
+                            ${p.description || 'No description provided.'}
+                        </div>
+                    </td>
+                    <td class="p-4">
+                        <div class="flex flex-wrap gap-1">
+                            ${p.all_languages.slice(0, 3).map(l => `
+                                <span class="px-1.5 py-0.5 text-[9px] bg-transparent text-white rounded border-2 border-primary/50 uppercase font-black">
+                                    ${l}
+                                </span>`).join('')}
+                        </div>
+                    </td>
+                    <td class="p-4 text-xs">
+                        ${p.commit_count || 0}C | ${p.stars || 0}S | ${p.forks || 0}F
+                    </td>
+                    <td class="p-4 text-right text-xs">${new Date(p.updated_at).toLocaleDateString()}</td>
+                </tr>
+            `).join('')}
+        </tbody>
+    </table>
+`;
+}
 
-    // --- 4. Pagination & Helpers ---
-    function renderPagination(totalPages) {
-        if (totalPages <= 1) {
-            elements.pagination.innerHTML = '';
-            return;
-        }
+            // --- 4. Pagination & Helpers ---
+            function renderPagination(totalPages) {
+                if (totalPages <= 1) {
+                    elements.pagination.innerHTML = '';
+                    return;
+                }
 
-        let dots = '';
-        for (let i = 1; i <= totalPages; i++) {
-            const isActive = i === currentPage;
-            dots += `
-                <button onclick="changePage(${i})" class="w-8 h-8 rounded-full transition-all duration-300 flex items-center justify-center 
-                ${isActive ? 'bg-primary text-white scale-110 font-bold' : 'bg-white/10 text-slate-500 hover:bg-white/20'}">
-                    ${i}
-                </button>
+                let dots = '';
+                for (let i = 1; i <= totalPages; i++) {
+                    const isActive = i === currentPage;
+                    dots += `
+                    <button onclick="changePage(${i})" class="w-8 h-8 rounded-full transition-all duration-300 flex items-center justify-center 
+                    ${isActive ? 'bg-primary text-slate-300 scale-110 font-bold shadow-[0_0_15px_rgba(11,11,217,0.4)]' : 'bg-white/5 text-slate-300 hover:bg-white/10'}">
+                        ${i}
+                    </button>
+                `;
+                }
+
+                elements.pagination.innerHTML = `
+                <div class="flex items-center gap-4 mt-10 justify-center">
+                    <button onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''} class="p-2 rounded-full hover:bg-white/10 text-white disabled:opacity-30 transition-all">
+                        <span class="material-symbols-outlined">chevron_left</span>
+                    </button>
+                    <div class="flex gap-2">${dots}</div>
+                    <button onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''} class="p-2 rounded-full hover:bg-white/10 text-white disabled:opacity-30 transition-all">
+                        <span class="material-symbols-outlined">chevron_right</span>
+                    </button>
+                </div>
             `;
-        }
+            }
 
-        elements.pagination.innerHTML = `
-            <div class="flex items-center gap-4 mt-10 justify-center">
-                <button onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''} class="p-2 rounded-full hover:bg-primary/20 text-white disabled:opacity-30 transition-all">
-                    <span class="material-symbols-outlined">chevron_left</span>
-                </button>
-                <div class="flex gap-2">${dots}</div>
-                <button onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''} class="p-2 rounded-full hover:bg-primary/20 text-white disabled:opacity-30 transition-all">
-                    <span class="material-symbols-outlined">chevron_right</span>
-                </button>
-            </div>
-        `;
-    }
+            window.changePage = (page) => {
+                currentPage = page;
+                render();
+                elements.container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            };
 
-    window.changePage = (page) => {
-        currentPage = page;
-        render();
-        elements.container.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    };
-
-    function showShimmer() {
-        elements.container.className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6";
-        elements.container.innerHTML = Array(CONFIG.shimmerCount).fill(0).map(() => `
-            <div class="glass-panel p-6 rounded-xl h-[300px] animate-pulse bg-white/5">
-                <div class="h-6 w-3/4 bg-white/10 rounded mb-4"></div>
-                <div class="h-4 w-full bg-white/10 rounded mb-2"></div>
-                <div class="h-4 w-5/6 bg-white/10 rounded mb-6"></div>
-                <div class="flex gap-2 mt-auto">
-                    <div class="h-5 w-12 bg-white/10 rounded"></div>
-                    <div class="h-5 w-12 bg-white/10 rounded"></div>
+            function showShimmer() {
+                elements.container.className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6";
+                elements.container.innerHTML = Array(CONFIG.shimmerCount).fill(0).map(() => `
+                <div class="glass-panel p-6 rounded-xl h-[300px] animate-pulse bg-white/5 border border-white/5">
+                    <div class="h-6 w-3/4 bg-white/10 rounded mb-4"></div>
+                    <div class="h-4 w-full bg-white/10 rounded mb-2"></div>
+                    <div class="h-4 w-5/6 bg-white/10 rounded mb-6"></div>
+                    <div class="flex gap-2 mt-auto">
+                        <div class="h-5 w-12 bg-white/10 rounded"></div>
+                        <div class="h-5 w-12 bg-white/10 rounded"></div>
+                    </div>
                 </div>
-            </div>
-        `).join('');
-    }
+            `).join('');
+            }
 
-    function populateLanguages(langs) {
-        elements.langFilter.innerHTML = '<option value="all">All Languages</option>' + 
-            langs.map(l => `<option value="${l}">${l}</option>`).join('');
-    }
+            function populateLanguages(langs) {
+                elements.langFilter.innerHTML = '<option value="all">All Languages</option>' +
+                    langs.map(l => `<option value="${l}">${l}</option>`).join('');
+            }
 
-    // --- 5. Event Listeners ---
-    elements.search.addEventListener('input', applyFilters);
-    elements.langFilter.addEventListener('change', applyFilters);
-    elements.sortSelect.addEventListener('change', applyFilters);
-    elements.forkToggle.addEventListener('change', applyFilters);
-    elements.viewToggle.addEventListener('change', (e) => {
-        viewMode = e.target.checked ? 'list' : 'card';
-        currentPage = 1;
-        render();
-    });
+            function updateForkBadge() {
+                const forkCount = allProjects.filter(p => p.isFork).length;
+                if (elements.forkCountBadge) {
+                    elements.forkCountBadge.textContent = forkCount;
+                }
+            }
 
-    initProjects();
-});
-</script>
+            // --- 5. Event Listeners ---
+            elements.search.addEventListener('input', applyFilters);
+            elements.langFilter.addEventListener('change', applyFilters);
+            elements.sortSelect.addEventListener('change', applyFilters);
+            elements.forkToggle.addEventListener('change', applyFilters);
+
+            // Slider logic for Card-to-List transition
+            if (elements.viewTogglePill) {
+                elements.viewTogglePill.addEventListener('click', () => {
+                    // Smooth fade-out before switching content
+                    elements.container.style.opacity = '0';
+                    elements.container.style.transform = 'translateY(10px)';
+
+                    setTimeout(() => {
+                        // Toggle state
+                        viewMode = (viewMode === 'card') ? 'list' : 'card';
+
+                        // Update UI Slider Position
+                        elements.viewTogglePill.classList.toggle('list-active');
+
+                        // Update Active Icon Highlight
+                        const icons = elements.viewTogglePill.querySelectorAll('.view-icon-btn');
+                        icons.forEach(btn => {
+                            btn.classList.toggle('active', btn.dataset.view === viewMode);
+                        });
+
+                        // Re-render and fade-in
+                        currentPage = 1;
+                        render();
+
+                        elements.container.style.opacity = '1';
+                        elements.container.style.transform = 'translateY(0)';
+                    }, 300);
+                });
+            }
+
+            initProjects();
+        });
+    </script>
 
     <style>
+        /* --- Base Scrollbar Styles --- */
         ::-webkit-scrollbar {
             width: 8px;
         }
@@ -574,6 +634,7 @@ document.addEventListener('DOMContentLoaded', () => {
             background: #555;
         }
 
+        /* --- Reusable Glassmorphism (Skills & Panels) --- */
         .glass-panel {
             background: rgba(16, 16, 25, 0.4);
             backdrop-filter: blur(16px);
@@ -597,6 +658,7 @@ document.addEventListener('DOMContentLoaded', () => {
             box-shadow: 0 10px 40px -10px rgba(13, 13, 242, 0.2);
         }
 
+        /* --- Animations & Gradients --- */
         .text-gradient {
             background: linear-gradient(to right, #fff, #a5b4fc);
             -webkit-background-clip: text;
@@ -662,77 +724,196 @@ document.addEventListener('DOMContentLoaded', () => {
             white-space: nowrap;
             /* Prevents "Computing" from wrapping to a hidden line */
             transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-
-            /* Custom View Toggle Slider */
-.view-toggle-container {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: rgba(255, 255, 255, 0.05);
-    padding: 4px;
-    border-radius: 99px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.switch {
-    position: relative;
-    display: inline-block;
-    width: 50px;
-    height: 24px;
-}
-
-.switch input { opacity: 0; width: 0; height: 0; }
-
-.slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background-color: rgba(255, 255, 255, 0.1);
-    transition: .4s;
-    border-radius: 34px;
-}
-
-.slider:before {
-    position: absolute;
-    content: "";
-    height: 18px; width: 18px;
-    left: 3px; bottom: 3px;
-    background-color: white;
-    transition: .4s;
-    border-radius: 50%;
-}
-
-input:checked + .slider { background-color: #3b82f6; }
-input:checked + .slider:before { transform: translateX(26px); }
-
-/* Custom Form Elements */
-.project-input {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: white;
-    padding: 8px 16px;
-    border-radius: 8px;
-    outline: none;
-    transition: all 0.3s ease;
-}
-
-.project-input:focus {
-    border-color: #3b82f6;
-    background: rgba(255, 255, 255, 0.08);
-}
-
-/* Table Styling for List View */
-.projects-table th {
-    padding: 12px 16px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.projects-table td {
-    padding: 16px;
-    vertical-align: middle;
-}
         }
+
+        /* --- Project Section Glass Inputs --- */
+
+        /* --- Dedicated Search & Filter Styling --- */
+        .glass-input {
+            /* Force transparency to kill the white box from Screenshot 2026-05-01 002526.jpg */
+            background: rgba(255, 255, 255, 0.03) !important;
+            backdrop-filter: blur(12px) !important;
+            -webkit-backdrop-filter: blur(12px) !important;
+
+            /* Perfect match for filter corners and borders */
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            border-radius: 10px !important;
+
+            color: white !important;
+            padding: 0.6rem 1rem;
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+            outline: none;
+            /* Centering Logic */
+    text-align: center;
+    text-align-last: center; /* Ensures the selected value is centered */
+            
+        }
+
+        /* Updated Blue Glow Effect on Focus */
+        /* Active State: Blue Border & Glow */
+        .glass-input:focus {
+            background: rgba(255, 255, 255, 0.07) !important;
+            border-color: rgba(11, 11, 217, 0.6) !important;
+            /* Your Primary Blue */
+            box-shadow: 0 0 15px rgba(11, 11, 217, 0.3);
+        }
+
+        /* Ensure placeholder and icon are white/semi-transparent white */
+        .glass-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Chrome/Safari/Edge: Remove auto-fill white backgrounds */
+        .glass-input:-webkit-autofill,
+        .glass-input:-webkit-autofill:hover,
+        .glass-input:-webkit-autofill:focus {
+            -webkit-text-fill-color: white;
+            -webkit-box-shadow: 0 0 0px 1000px rgba(20, 20, 30, 1) inset;
+            transition: background-color 5000s ease-in-out 0s;
+        }
+
+        /* Custom Primary Glow Effect */
+.hover-glow-primary:hover {
+    /* Uses your primary blue #0b0bd9 with 40% opacity for the glow */
+    box-shadow: 0 0 20px rgba(11, 11, 217, 0.4);
+    border-color: rgba(11, 11, 217, 0.5) !important;
+}
+
+        /* Apply the same glass style to Select dropdowns */
+select.glass-input {
+    appearance: none;
+    /* Move arrow slightly more to the right to give text more room */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center; 
+    background-size: 1rem;
+    /* Equalize horizontal padding for better centering visual */
+    padding-left: 1.5rem; 
+    padding-right: 1.5rem;
+}
+
+        /* This targets the dropdown list itself in many browsers */
+        select.glass-input option {
+            background-color: #0f0f1a;
+            /* Match your darkest background hue */
+            color: white;
+            padding: 10px;
+        }
+
+        /* Keep search text left-aligned since it has a magnifying glass icon */
+input#project-search.glass-input {
+    text-align: left;
+    text-align-last: left;
+    padding-left: 2.5rem;
+}
+
+        /* --- Custom Checkbox (Include Forks) --- */
+        .custom-checkbox {
+            width: 18px;
+            height: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.03);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        input[type="checkbox"]:checked+.custom-checkbox {
+            background: white;
+            border-color: white;
+        }
+
+        input[type="checkbox"]:checked+.custom-checkbox::after {
+            content: 'check';
+            font-family: 'Material Symbols Outlined';
+            color: black;
+            font-size: 14px;
+        }
+
+        /* --- Video-Style Pill Slider (View Toggle) --- */
+        .view-switch {
+            position: relative;
+            display: flex;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 4px;
+            width: 100px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .view-switch-pill {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: 44px;
+            height: 32px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1;
+        }
+
+        /* Slide to List position */
+        .view-switch.list-active .view-switch-pill {
+            transform: translateX(46px);
+        }
+
+        .view-icon-btn {
+            flex: 1;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2;
+            color: rgba(255, 255, 255, 0.3);
+            transition: color 0.3s ease;
+        }
+
+        .view-icon-btn.active {
+            color: white;
+        }
+
+        /* Card-to-List Opacity Transition Container */
+        #projects-display-area {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+@keyframes sideSlideIn {
+    0% {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.animate-slide {
+    opacity: 0;
+    /* Using a 'decelerate' easing for a smoother entrance */
+    animation: sideSlideIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+        /* --- Pagination Badge --- */
+        .count-badge {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.6);
+            padding: 2px 8px;
+            border-radius: 99px;
+            font-size: 0.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+
     </style>
+
 </head>
 
 <body
@@ -807,6 +988,7 @@ input:checked + .slider:before { transform: translateX(26px); }
 
     <!-- Main Content Wrapper -->
     <main class="relative z-10 flex flex-col items-center w-full pt-32 px-4 sm:px-6">
+        <!-- Landing/Home Page -->
         <section class="max-w-6xl w-full flex flex-col items-center py-16 sm:py-24 animate-fade-in-up">
 
             <div class="w-full flex flex-col md:flex-row items-center md:items-center justify-center gap-24 mb-16">
@@ -1061,54 +1243,66 @@ input:checked + .slider:before { transform: translateX(26px); }
         </section>
 
         <!-- Featured Projects -->
-<section class="max-w-6xl w-full py-16 scroll-mt-24" id="projects">
-    <div class="flex items-center gap-4 mb-10 px-2">
-        <span class="h-px flex-1 bg-gradient-to-r from-transparent to-white/20"></span>
-        <h2 class="text-3xl font-bold text-white">Featured Projects</h2>
-        <span class="h-px flex-1 bg-gradient-to-l from-transparent to-white/20"></span>
-    </div>
-
-    <div class="glass-panel p-6 rounded-2xl mb-8 flex flex-wrap items-center justify-between gap-6">
-        <div class="flex flex-wrap items-center gap-4 flex-grow lg:flex-nowrap">
-            <div class="relative flex-grow max-w-md">
-                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">search</span>
-                <input type="text" id="project-search" placeholder="Search projects..." 
-                       class="project-input w-full pl-10 text-sm">
+        <section class="max-w-6xl w-full py-16 scroll-mt-24 mx-auto" id="projects">
+            <div class="flex items-center gap-4 mb-10 px-2">
+                <span class="h-px flex-1 bg-gradient-to-r from-transparent to-white/20"></span>
+                <h2 class="text-3xl font-bold text-white">Featured Projects</h2>
+                <span class="h-px flex-1 bg-gradient-to-l from-transparent to-white/20"></span>
             </div>
-            <select id="lang-filter" class="project-input text-sm min-w-[140px]">
-                <option value="all">All Languages</option>
-                </select>
-        </div>
 
-        <div class="flex flex-wrap items-center gap-6">
-            <select id="sort-select" class="project-input text-sm">
-                <option value="recent">Recently Updated</option>
-                <option value="az">A-Z</option>
-                <option value="commits">Most Commits</option>
-            </select>
+            <div
+                class="glass-panel p-4 rounded-2xl mb-10 border border-white/5 flex flex-wrap items-center justify-between gap-6">
+                <div class="flex items-center gap-4 flex-grow lg:flex-nowrap min-w-[300px]">
+                    <div class="relative w-full max-w-md">
+                        <span
+                            class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-white text-[18px] z-10 select-none">
+                            search
+                        </span>
+                        <input type="text" id="project-search" placeholder="Search projects..."
+                            class="glass-input w-full pl-10">
+                    </div>
+                    <div class="flex flex-wrap gap-4 items-center">
+                        <!-- Language Filter (Restored ID: lang-filter) -->
+                        <div class="relative">
+                            <select id="lang-filter" class="glass-input text-sm min-w-[150px]">
+                                <option value="all">All Languages</option>
+                                <!-- JavaScript will populate other languages here -->
+                            </select>
+                        </div>
 
-            <label class="flex items-center gap-2 cursor-pointer text-slate-400 text-sm group">
-                <input type="checkbox" id="fork-toggle" class="accent-primary">
-                <span class="group-hover:text-white transition-colors">Include Forks</span>
-            </label>
+                        <!-- Sort Filter (Restored ID: sort-select) -->
+                        <div class="relative">
+                            <select id="sort-select" class="glass-input text-sm">
+                                <option value="recent">Recently Updated</option>
+                                <option value="az">A-Z</option>
+                                <option value="commits">Most Commits</option>
+                            </select>
+                        </div>
+                    </div>
 
-            <div class="view-toggle-container">
-                <span class="material-symbols-outlined text-sm text-slate-400">grid_view</span>
-                <label class="switch">
-                    <input type="checkbox" id="view-toggle">
-                    <span class="slider"></span>
-                </label>
-                <span class="material-symbols-outlined text-sm text-slate-400">list</span>
+                    <label
+                        class="flex items-center cursor-pointer text-slate-400 text-sm hover:text-white transition-colors group">
+                        <input type="checkbox" id="fork-toggle" class="hidden">
+                        <div class="custom-checkbox mr-2"></div>
+                        Include Forks <span id="fork-count" class="count-badge ml-2">0</span>
+                    </label>
+
+                    <div class="view-switch" id="view-toggle-pill">
+                        <div class="view-switch-pill"></div>
+                        <div class="view-icon-btn active" data-view="card">
+                            <span class="material-symbols-outlined">grid_view</span>
+                        </div>
+                        <div class="view-icon-btn" data-view="list">
+                            <span class="material-symbols-outlined">list</span>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
 
-    <div id="projects-display-area" class="min-h-[400px]">
-        </div>
+            <div id="projects-display-area"></div>
 
-    <div id="pagination-controls" class="mt-12">
-        </div>
-</section>
+            <div id="pagination-controls"></div>
+        </section>
 
         <!-- Experience & Education -->
         <section class="max-w-6xl w-full py-16 scroll-mt-24" id="experience">
