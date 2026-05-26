@@ -207,7 +207,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             const typewriterElement = document.getElementById('typewriter-text');
             // Your exact bio from the source code
-            const fullText = "A recent Bachelor of Computer and Information Sciences graduate with a strong foundation in software development and broad technical interests across cybersecurity, cloud computing,artificial intelligence, and many more. I have hands-on experience developing full-stack, production-ready applications using .NET, C#, HTML, Java, JavaScript, SQL, and React, gained through academic projects and Agile team environments. I am a highly motivated learner with a strong commitment to skill development, industry certifications, and continuous professional growth. If you’re looking for a driven, adaptable, and enthusiastic individual with a passion for technology and continuous learning, I’d love to connect and explore how I can contribute to your team!";
+            const fullText = "A recent Bachelor of Computer and Information Sciences graduate with a strong foundation in software development and broad technical interests across cybersecurity, cloud computing, artificial intelligence, and many more. I have hands-on experience developing full-stack, production-ready applications using .NET, C#, HTML, Java, JavaScript, SQL, and React, gained through academic projects and Agile team environments. I am a highly motivated learner with a strong commitment to skill development, industry certifications, and continuous professional growth. If you’re looking for a driven, adaptable, and enthusiastic individual with a passion for technology and continuous learning, I’d love to connect and explore how I can contribute to your team!";
 
             let charIndex = 0;
             let isAnimating = false;
@@ -369,26 +369,42 @@
                 forkCountBadge: document.getElementById('fork-count')
             };
 
-            // --- 1. Fetch Data ---
-            async function initProjects() {
-                showShimmer();
-                try {
-                    const response = await fetch('/.netlify/functions/getGithubData');
-                    const data = await response.json();
-                    allProjects = data.projects || [];
+// --- 1. Fetch Data ---
+async function initProjects() {
+    showShimmer();
+    try {
+        const response = await fetch('/.netlify/functions/getGithubData');
+        const data = await response.json();
+        allProjects = data.projects || [];
 
-                    // Populate Language Dropdown
-                    populateLanguages(data.allLanguages);
+        // Populate Language Dropdown
+        populateLanguages(data.allLanguages);
 
-                    // Update the "Include Forks" count badge
-                    updateForkBadge();
+        // Update the "Include Forks" count badge
+        updateForkBadge();
 
-                    applyFilters();
-                } catch (err) {
-                    console.error("Failed to load projects:", err);
-                    elements.container.innerHTML = `<p class="text-red-400 text-center py-10">Error loading projects. Please try again later.</p>`;
-                }
-            }
+        applyFilters();
+    } catch (err) {
+        console.error("Failed to load projects:", err);
+        
+        // Centered, interactive glass error card view
+        elements.container.innerHTML = `
+            <div class="col-span-full flex flex-col items-center justify-center text-center py-12 px-4 max-w-md mx-auto">
+                <div class="w-12 h-12 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-400 mb-4 animate-pulse">
+                    <span class="material-symbols-outlined text-2xl">error</span>
+                </div>
+                <h4 class="text-white font-semibold text-base mb-1">Failed to Load Projects</h4>
+                <p class="text-sm text-slate-400 mb-5">
+                    There was an issue communicating with the GitHub API sync pipeline.
+                </p>
+                <button onclick="location.reload()" class="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-wider text-white bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 active:scale-95 transition-all duration-150 cursor-pointer">
+                    <span class="material-symbols-outlined text-sm">refresh</span>
+                    Try Again
+                </button>
+            </div>
+        `;
+    }
+}
 
             // --- 2. Filter & Sort Logic ---
             function applyFilters() {
@@ -419,7 +435,25 @@
             }
 
             // --- 3. Rendering Logic ---
-            function render() {
+function render() {
+                // ADDED: Search & Filter Empty-State Logical Check
+                if (filteredProjects.length === 0) {
+                    elements.container.className = "grid grid-cols-1 w-full";
+                    elements.container.innerHTML = `
+                        <div class="col-span-full flex flex-col items-center justify-center text-center py-16 px-4 max-w-md mx-auto">
+                            <div class="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 mb-4">
+                                <span class="material-symbols-outlined text-2xl">search_off</span>
+                            </div>
+                            <h4 class="text-white font-semibold text-base mb-1">No Projects Found</h4>
+                            <p class="text-sm text-slate-400">
+                                We couldn't find any repositories matching your exact search criteria or filters options. Try adjusting your keywords!
+                            </p>
+                        </div>
+                    `;
+                    renderPagination(0); // Wipe out pagination handles clean
+                    return;
+                }
+
                 const pageSize = viewMode === 'card' ? CONFIG.cardPageSize : CONFIG.listPageSize;
                 const startIndex = (currentPage - 1) * pageSize;
                 const paginatedItems = filteredProjects.slice(startIndex, startIndex + pageSize);
@@ -448,12 +482,12 @@
             <p class="text-slate-400 text-sm mb-4 flex-grow ${!project.description ? 'italic' : 'not-italic'}">
                 ${project.description || 'No description provided.'}
             </p>
-            <div class="flex flex-wrap gap-2 mb-6">
-                ${project.all_languages.map(lang => `
-                    <span class="px-2 py-1 text-[10px] bg-transparent text-white rounded-md border-2 border-primary/50 uppercase font-bold tracking-wider">
-                        ${lang}
-                    </span>`).join('')}
-            </div>
+<div class="flex flex-wrap gap-2 mb-6">
+    ${project.all_languages.map(lang => `
+        <span class="px-2 py-1 text-[10px] bg-primary text-white rounded-md border border-transparent uppercase font-bold tracking-wider">
+            ${lang}
+        </span>`).join('')}
+</div>
             <div class="grid grid-cols-2 gap-y-3 pt-4 border-t border-white/10 text-xs text-slate-500">
                 <div class="flex items-center gap-2"><span class="material-symbols-outlined text-sm">history</span> ${project.commit_count || 0} Commits</div>
                 <div class="flex items-center gap-2"><span class="material-symbols-outlined text-sm">star</span> ${project.stars || 0} Stars</div>
@@ -493,12 +527,12 @@
                         </div>
                     </td>
                     <td class="p-4">
-                        <div class="flex flex-wrap gap-1">
-                            ${p.all_languages.slice(0, 3).map(l => `
-                                <span class="px-1.5 py-0.5 text-[9px] bg-transparent text-white rounded border-2 border-primary/50 uppercase font-black">
-                                    ${l}
-                                </span>`).join('')}
-                        </div>
+<div class="flex flex-wrap gap-1">
+    ${p.all_languages.slice(0, 3).map(l => `
+        <span class="px-1.5 py-0.5 text-[9px] bg-primary text-white rounded border border-transparent uppercase font-black">
+            ${l}
+        </span>`).join('')}
+</div>
                     </td>
                     <td class="p-4 text-xs">
                         ${p.commit_count || 0}C | ${p.stars || 0}S | ${p.forks || 0}F
@@ -781,26 +815,44 @@
             border-color: rgba(11, 11, 217, 0.5) !important;
         }
 
-        /* Apply the same glass style to Select dropdowns */
-        select.glass-input {
-            appearance: none;
-            /* Move arrow slightly more to the right to give text more room */
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 0.5rem center;
-            background-size: 1rem;
-            /* Equalize horizontal padding for better centering visual */
-            padding-left: 1.5rem;
-            padding-right: 1.5rem;
-        }
+/* Apply the same glass style to Select dropdowns */
+select.glass-input {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    
+    /* Clean, platform-agnostic centering properties */
+    text-align: center !important;
+    text-align-last: center !important;
+    
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    /* Positions the icon precisely on the right edge with safety clearance */
+    background-position: calc(100% - 0.75rem) center;
+    background-size: 1rem;
+    
+    /* Symmetric, tight padding prevents text from being pushed off-center */
+    padding-left: 1rem !important;
+    padding-right: 1.75rem !important; /* Tiny bit extra purely to clear the absolute arrow space */
+}
 
         /* This targets the dropdown list itself in many browsers */
-        select.glass-input option {
-            background-color: #0f0f1a;
-            /* Match your darkest background hue */
-            color: white;
-            padding: 10px;
-        }
+/* This overrides the native system overlay menu block alignment */
+/* Fixes the expanded system dropdown menu panel alignment */
+select.glass-input option {
+    background-color: #0f0f1a; /* Matches your darkest background hue */
+    color: white;
+    padding: 10px 0;
+    
+    /* Drops the RTL layout to fix the over-left drift and sets true center */
+    direction: ltr !important;
+    text-align: center !important;
+}
+
+/* Re-adjust text behavior inside option text elements back to standard reading frame */
+select.glass-input option * {
+    direction: ltr;
+}
 
         /* Keep search text left-aligned since it has a magnifying glass icon */
         input#project-search.glass-input {
@@ -1262,20 +1314,17 @@
                             class="glass-input w-full pl-10">
                     </div>
                     <div class="flex flex-wrap gap-4 items-center">
-                        <!-- Language Filter (Restored ID: lang-filter) -->
                         <div class="relative">
-                            <select id="lang-filter" class="glass-input text-sm min-w-[150px]">
-                                <option value="all">All Languages</option>
-                                <!-- JavaScript will populate other languages here -->
+                            <select id="lang-filter" class="glass-input text-sm min-w-[150px] text-center">
+                                <option value="all" class="text-center">All Languages</option>
                             </select>
                         </div>
 
-                        <!-- Sort Filter (Restored ID: sort-select) -->
                         <div class="relative">
-                            <select id="sort-select" class="glass-input text-sm">
-                                <option value="recent">Recently Updated</option>
-                                <option value="az">A-Z</option>
-                                <option value="commits">Most Commits</option>
+                            <select id="sort-select" class="glass-input text-sm text-center">
+                                <option value="recent" class="text-center">Recently Updated</option>
+                                <option value="az" class="text-center">A-Z</option>
+                                <option value="commits" class="text-center">Most Commits</option>
                             </select>
                         </div>
                     </div>
@@ -1411,7 +1460,7 @@
                                         Honors &amp; Awards
                                     </p>
 
-                                    <div
+                                    <!-- <div
                                         class="flex items-center gap-3 p-3 bg-white/5 rounded-lg border border-white/5">
                                         <img src="assets/images/gks.png"
                                             alt="Golden Key International Honour Society Logo"
@@ -1422,7 +1471,21 @@
                                             <p class="text-xs text-slate-500">Recognized for Top 15% in academic
                                                 excellence</p>
                                         </div>
-                                    </div>
+                                    </div> -->
+                                    <a href="https://golden-key-international-honou.verified.cv/en/verify/00258436574822"
+                                        target="_blank" rel="noopener noreferrer"
+                                        class="flex items-center gap-3 p-3 bg-white/5 rounded-lg border border-white/5 hover:bg-white/10 transition-colors duration-200 group">
+                                        <img src="assets/images/gks.png" alt="GKS Logo"
+                                            class="w-8 h-8 rounded object-contain bg-white/5" />
+                                        <div>
+                                            <p
+                                                class="text-sm font-semibold text-white group-hover:text-white transition-colors">
+                                                Golden Key International Honour
+                                                Society Award</p>
+                                            <p class="text-xs text-slate-500">Recognized for Top 15% in academic
+                                                excellence</p>
+                                        </div>
+                                    </a>
                                 </div>
                             </div>
 
@@ -1441,7 +1504,7 @@
                                         <div>
                                             <p
                                                 class="text-sm font-semibold text-white group-hover:text-white transition-colors">
-                                                Pre Security Certificate</p>
+                                                TryHackMe: Pre Security Certificate</p>
                                             <p class="text-xs text-slate-500">Issued Feb 2026 · Expires Feb 2029</p>
                                         </div>
                                     </a>
@@ -1454,7 +1517,7 @@
                                         <div>
                                             <p
                                                 class="text-sm font-semibold text-white group-hover:text-white transition-colors">
-                                                Introduction to Cybersecurity</p>
+                                                Cisco Networking Academy: Introduction to Cybersecurity</p>
                                             <p class="text-xs text-slate-500">Issued Dec 2025</p>
                                         </div>
                                     </a>
