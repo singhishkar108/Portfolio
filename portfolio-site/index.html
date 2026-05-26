@@ -433,9 +433,9 @@
                 renderPagination(Math.ceil(filteredProjects.length / pageSize));
             }
 
-function renderCardView(projects) {
-    elements.container.className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6";
-    elements.container.innerHTML = projects.map((project, index) => `
+            function renderCardView(projects) {
+                elements.container.className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6";
+                elements.container.innerHTML = projects.map((project, index) => `
     <div class="glass-panel p-6 rounded-xl hover:translate-y-[-5px] transition-all duration-300 border border-white/10 hover-glow-primary group relative overflow-hidden animate-slide"
          style="animation-delay: ${index * 0.1}s">
         <div class="flex flex-col h-full">
@@ -463,11 +463,11 @@ function renderCardView(projects) {
         </div>
     </div>
 `).join('');
-}
+            }
 
-function renderListView(projects) {
-    elements.container.className = "overflow-x-auto w-full glass-panel rounded-xl border border-primary/5";
-    elements.container.innerHTML = `
+            function renderListView(projects) {
+                elements.container.className = "overflow-x-auto w-full glass-panel rounded-xl border border-primary/5";
+                elements.container.innerHTML = `
     <table class="w-full text-left border-collapse">
         <thead class="bg-white/5 text-slate-300 text-sm uppercase">
             <tr>
@@ -509,7 +509,7 @@ function renderListView(projects) {
         </tbody>
     </table>
 `;
-}
+            }
 
             // --- 4. Pagination & Helpers ---
             function renderPagination(totalPages) {
@@ -745,9 +745,10 @@ function renderListView(projects) {
             transition: all 0.3s ease;
             outline: none;
             /* Centering Logic */
-    text-align: center;
-    text-align-last: center; /* Ensures the selected value is centered */
-            
+            text-align: center;
+            text-align-last: center;
+            /* Ensures the selected value is centered */
+
         }
 
         /* Updated Blue Glow Effect on Focus */
@@ -774,24 +775,24 @@ function renderListView(projects) {
         }
 
         /* Custom Primary Glow Effect */
-.hover-glow-primary:hover {
-    /* Uses your primary blue #0b0bd9 with 40% opacity for the glow */
-    box-shadow: 0 0 20px rgba(11, 11, 217, 0.4);
-    border-color: rgba(11, 11, 217, 0.5) !important;
-}
+        .hover-glow-primary:hover {
+            /* Uses your primary blue #0b0bd9 with 40% opacity for the glow */
+            box-shadow: 0 0 20px rgba(11, 11, 217, 0.4);
+            border-color: rgba(11, 11, 217, 0.5) !important;
+        }
 
         /* Apply the same glass style to Select dropdowns */
-select.glass-input {
-    appearance: none;
-    /* Move arrow slightly more to the right to give text more room */
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 0.5rem center; 
-    background-size: 1rem;
-    /* Equalize horizontal padding for better centering visual */
-    padding-left: 1.5rem; 
-    padding-right: 1.5rem;
-}
+        select.glass-input {
+            appearance: none;
+            /* Move arrow slightly more to the right to give text more room */
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.5rem center;
+            background-size: 1rem;
+            /* Equalize horizontal padding for better centering visual */
+            padding-left: 1.5rem;
+            padding-right: 1.5rem;
+        }
 
         /* This targets the dropdown list itself in many browsers */
         select.glass-input option {
@@ -802,11 +803,11 @@ select.glass-input {
         }
 
         /* Keep search text left-aligned since it has a magnifying glass icon */
-input#project-search.glass-input {
-    text-align: left;
-    text-align-last: left;
-    padding-left: 2.5rem;
-}
+        input#project-search.glass-input {
+            text-align: left;
+            text-align-last: left;
+            padding-left: 2.5rem;
+        }
 
         /* --- Custom Checkbox (Include Forks) --- */
         .custom-checkbox {
@@ -884,22 +885,23 @@ input#project-search.glass-input {
             transition: opacity 0.3s ease, transform 0.3s ease;
         }
 
-@keyframes sideSlideIn {
-    0% {
-        opacity: 0;
-        transform: translateX(-30px);
-    }
-    100% {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
+        @keyframes sideSlideIn {
+            0% {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
 
-.animate-slide {
-    opacity: 0;
-    /* Using a 'decelerate' easing for a smoother entrance */
-    animation: sideSlideIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .animate-slide {
+            opacity: 0;
+            /* Using a 'decelerate' easing for a smoother entrance */
+            animation: sideSlideIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
 
         /* --- Pagination Badge --- */
         .count-badge {
@@ -910,8 +912,6 @@ input#project-search.glass-input {
             font-size: 0.75rem;
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
-
-
     </style>
 
 </head>
@@ -1305,7 +1305,7 @@ input#project-search.glass-input {
         </section>
 
         <!-- Experience & Education -->
-<section class="max-w-6xl w-full py-16 scroll-mt-24" id="experience">
+        <section class="max-w-6xl w-full py-16 scroll-mt-24" id="experience">
             <div class="flex items-center gap-4 mb-10 px-2">
                 <span class="h-px flex-1 bg-gradient-to-r from-transparent to-white/20"></span>
                 <h2 class="text-3xl font-bold text-white">Professional Background</h2>
@@ -1326,15 +1326,20 @@ input#project-search.glass-input {
                                     class="absolute -left-[21px] top-1 w-3 h-3 rounded-full bg-primary border-4 border-background-dark">
                                 </div>
                                 <h3 class="text-lg font-bold text-white">Mathematics Tutor</h3>
-                                <p class="text-primary text-sm font-medium mb-1">Sonal's Maths &amp; Physics Tuition • Part-time • Mar 2024 - Nov 2024</p>
+                                <p class="text-slate-400 text-sm font-medium mb-1">Sonal's Maths &amp; Physics Tuition •
+                                    Part-time • Mar 2024 - Nov 2024</p>
                                 <p class="text-xs text-slate-500 mb-2">Durban, KwaZulu-Natal, South Africa • On-site</p>
                                 <ul class="list-disc list-outside text-sm text-slate-400 pl-4 space-y-1 mt-2">
-                                    <li>Tutored secondary school students in algebra, geometry, trigonometry, and statistics.</li>
-                                    <li>Assessed student strengths and weaknesses to create personalized learning plans.</li>
-                                    <li>Delivered engaging lessons reinforcing key concepts and problem-solving strategies.</li>
+                                    <li>Tutored secondary school students in algebra, geometry, trigonometry, and
+                                        statistics.</li>
+                                    <li>Assessed student strengths and weaknesses to create personalized learning plans.
+                                    </li>
+                                    <li>Delivered engaging lessons reinforcing key concepts and problem-solving
+                                        strategies.</li>
                                     <li>Assisted with homework, practice exercises, and exam preparation.</li>
                                     <li>Provided individualized guidance to address challenges and ensure progress.</li>
-                                    <li>Fostered a positive, supportive learning environment to build student confidence.</li>
+                                    <li>Fostered a positive, supportive learning environment to build student
+                                        confidence.</li>
                                 </ul>
                             </div>
 
@@ -1343,16 +1348,23 @@ input#project-search.glass-input {
                                     class="absolute -left-[21px] top-1 w-3 h-3 rounded-full bg-slate-600 border-4 border-background-dark">
                                 </div>
                                 <h3 class="text-lg font-bold text-white">Java Programming Tutor</h3>
-                                <p class="text-slate-400 text-sm font-medium mb-1">Emeris • Part-time • Apr 2024 - Jul 2024</p>
-                                <p class="text-xs text-slate-500 mb-2">Westville, Durban, KwaZulu-Natal, South Africa • On-site</p>
+                                <p class="text-slate-400 text-sm font-medium mb-1">Emeris • Part-time • Apr 2024 - Jul
+                                    2024</p>
+                                <p class="text-xs text-slate-500 mb-2">Westville, Durban, KwaZulu-Natal, South Africa •
+                                    On-site</p>
                                 <ul class="list-disc list-outside text-sm text-slate-400 pl-4 space-y-1 mt-2">
                                     <li>Java programming tutor for Programming 1A [PROG5121] module.</li>
-                                    <li>Assisted first-year Bachelor of Computer Science students with Java fundamentals and assignments.</li>
+                                    <li>Assisted first-year Bachelor of Computer Science students with Java fundamentals
+                                        and assignments.</li>
                                     <li>Tailored lessons to individual student challenges and learning styles.</li>
-                                    <li>Debugged code and guided students in understanding errors and problem-solving.</li>
-                                    <li>Conducted one-on-one and group tutoring sessions, reinforcing classroom concepts.</li>
-                                    <li>Reviewed and provided feedback on student code for correctness, efficiency, and best practices.</li>
-                                    <li>Collaborated with lecturers and fellow tutors to align strategies and improve outcomes.</li>
+                                    <li>Debugged code and guided students in understanding errors and problem-solving.
+                                    </li>
+                                    <li>Conducted one-on-one and group tutoring sessions, reinforcing classroom
+                                        concepts.</li>
+                                    <li>Reviewed and provided feedback on student code for correctness, efficiency, and
+                                        best practices.</li>
+                                    <li>Collaborated with lecturers and fellow tutors to align strategies and improve
+                                        outcomes.</li>
                                     <li>Designed additional exercises and coding challenges to enhance learning.</li>
                                 </ul>
                             </div>
@@ -1371,26 +1383,46 @@ input#project-search.glass-input {
                                 <div
                                     class="absolute -left-[21px] top-1 w-3 h-3 rounded-full bg-aurora-purple border-4 border-background-dark">
                                 </div>
-                                <h3 class="text-lg font-bold text-white">Bachelor of Computer and Information Sciences in Application Development</h3>
-                                <p class="text-aurora-purple text-sm font-medium mb-1">Emeris (formerly IIE Varsity College) • Jan 2023 – Dec 2025</p>
-                                <p class="text-sm font-semibold text-emerald-400 mt-1">Grade: Distinction (92.67% Aggregate)</p>
-                                
+                                <h3 class="text-lg font-bold text-white">Bachelor of Computer and Information Sciences
+                                    in Application Development</h3>
+                                <p class="text-slate-400 text-sm font-medium mb-1">Emeris (formerly IIE Varsity College)
+                                    • Jan 2023 – Dec 2025</p>
+                                <div class="mt-2 flex flex-wrap">
+                                    <span
+                                        class="inline-block bg-aurora-purple text-white text-xs font-bold px-2.5 py-1 rounded-md tracking-wide shadow-sm">
+                                        Grade: Distinction (92.67% Aggregate)
+                                    </span>
+                                </div>
+
                                 <div class="text-sm text-slate-400 mt-3">
-                                    <p class="font-semibold text-white mb-1 text-xs uppercase tracking-wider">Key Highlights:</p>
+                                    <p class="font-semibold text-white mb-1 text-xs uppercase tracking-wider">Key
+                                        Highlights:</p>
                                     <ul class="list-disc list-outside pl-4 space-y-1">
-                                        <li><strong>Work Integrated Learning (WIL):</strong> Team Leader for a collaborative software project developing a production-ready platform for an external NPO (The Sanctuary NPO).</li>
+                                        <li><strong>Work Integrated Learning (WIL):</strong> Team Leader for a
+                                            collaborative software project developing a production-ready platform for an
+                                            external NPO (The Sanctuary NPO).</li>
                                     </ul>
                                 </div>
 
                                 <div class="text-sm text-slate-400 mt-4 pt-3 border-t border-white/5">
-                                    <p class="font-bold text-white flex items-center gap-1.5 text-xs uppercase tracking-wider">
-                                        <span class="material-symbols-outlined text-sm text-amber-400">military_tech</span>
+                                    <p
+                                        class="font-bold text-white flex items-center gap-1.5 text-xs uppercase tracking-wider mb-3">
+                                        <span class="material-symbols-outlined text-sm text-amber-400">trophy</span>
                                         Honors &amp; Awards
-                                                    </p>
-                                    <ul class="list-none pl-0 mt-1.5">
-                                        <li class="text-slate-300 font-medium">Golden Key International Honour Society Award</li>
-                                        <li class="text-xs text-slate-500">Recognized for Top 15% in academic excellence</li>
-                                    </ul>
+                                    </p>
+
+                                    <div
+                                        class="flex items-center gap-3 p-3 bg-white/5 rounded-lg border border-white/5">
+                                        <img src="assets/images/gks.png"
+                                            alt="Golden Key International Honour Society Logo"
+                                            class="w-8 h-8 rounded object-contain bg-white/5" />
+                                        <div>
+                                            <p class="text-sm font-semibold text-white">Golden Key International Honour
+                                                Society Award</p>
+                                            <p class="text-xs text-slate-500">Recognized for Top 15% in academic
+                                                excellence</p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -1400,29 +1432,36 @@ input#project-search.glass-input {
                                 </div>
                                 <h3 class="text-lg font-bold text-white">Certifications</h3>
                                 <div class="flex flex-col gap-3 mt-3">
-                                    
-                                    <div class="flex items-center gap-3 p-3 bg-white/5 rounded-lg border border-white/5">
-                                        <div class="w-8 h-8 rounded bg-white/10 flex items-center justify-center text-[10px] font-black tracking-tighter text-red-400">
-                                            THM
-                                        </div>
+
+                                    <a href="https://tryhackme.com/certificate/THM-XJPHFWRRLD" target="_blank"
+                                        rel="noopener noreferrer"
+                                        class="flex items-center gap-3 p-3 bg-white/5 rounded-lg border border-white/5 hover:bg-white/10 transition-colors duration-200 group">
+                                        <img src="assets/images/tryhackme.png" alt="TryHackMe Logo"
+                                            class="w-8 h-8 rounded object-contain bg-white/5" />
                                         <div>
-                                            <p class="text-sm font-semibold text-white">Pre Security Certificate</p>
+                                            <p
+                                                class="text-sm font-semibold text-white group-hover:text-white transition-colors">
+                                                Pre Security Certificate</p>
                                             <p class="text-xs text-slate-500">Issued Feb 2026 · Expires Feb 2029</p>
                                         </div>
-                                    </div>
-                                    
-                                    <div class="flex items-center gap-3 p-3 bg-white/5 rounded-lg border border-white/5">
-                                        <div class="w-8 h-8 rounded bg-white/10 flex items-center justify-center text-[10px] font-black tracking-tighter text-blue-400">
-                                            CISCO
-                                        </div>
+                                    </a>
+
+                                    <a href="https://www.credly.com/badges/6d207d80-98fb-465d-84e3-4e8f2cace7b2/public_url"
+                                        target="_blank" rel="noopener noreferrer"
+                                        class="flex items-center gap-3 p-3 bg-white/5 rounded-lg border border-white/5 hover:bg-white/10 transition-colors duration-200 group">
+                                        <img src="assets/images/cisco.png" alt="Cisco Logo"
+                                            class="w-8 h-8 rounded object-contain bg-white/5" />
                                         <div>
-                                            <p class="text-sm font-semibold text-white">Introduction to Cybersecurity</p>
+                                            <p
+                                                class="text-sm font-semibold text-white group-hover:text-white transition-colors">
+                                                Introduction to Cybersecurity</p>
                                             <p class="text-xs text-slate-500">Issued Dec 2025</p>
                                         </div>
-                                    </div>
+                                    </a>
 
                                 </div>
                             </div>
+
                         </div>
                     </div>
                 </div>
