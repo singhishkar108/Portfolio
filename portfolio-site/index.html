@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Dark Aurora CS Portfolio</title>
+    <title>Ishkar Singh Portfolio</title>
 
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com" rel="preconnect" />
@@ -50,19 +50,41 @@
                         'aurora-gradient':
                             'radial-gradient(circle at 50% 0%, rgba(139, 92, 246, 0.15), transparent 50%), radial-gradient(circle at 100% 0%, rgba(236, 72, 153, 0.15), transparent 50%), radial-gradient(circle at 0% 0%, rgba(13, 13, 242, 0.15), transparent 50%)'
                     },
-
                     keyframes: {
                         orbPulse: {
                             '0%, 100%': { opacity: '0.5' },
                             '50%': { opacity: '0.4' }
                         }
                     },
+                    /* --- STAGGERED ANIMATIONS SETUP --- */
                     animation: {
-                        'orb-pulse': 'orbPulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+                        'orb-pulse-1': 'orbPulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'orb-pulse-2': 'orbPulse 3.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'orb-pulse-3': 'orbPulse 4.5s cubic-bezier(0.4, 0, 0.6, 1) infinite'
                     }
                 }
             }
         };
+    </script>
+
+    <!-- DPText Shimmer Effect -->
+    <script>
+        // tailwind.config.js
+        module.exports = {
+            theme: {
+                extend: {
+                    animation: {
+                        'shimmer-sweep': 'multiShimmerSweep 0.85s cubic-bezier(0.19, 1, 0.22, 1) forwards',
+                    },
+                    keyframes: {
+                        multiShimmerSweep: {
+                            '0%': { left: '-150%' },
+                            '100%': { left: '150%' },
+                        },
+                    },
+                },
+            },
+        }
     </script>
 
     <!-- Text 'Enthusiast' Smooth Slide -->
@@ -265,17 +287,19 @@
         // 2. State Management
         let githubData = null;
         let hasAnimated = false;
+        let fetchFailed = false; // Added tracking variable to safely manage error state
 
         // 3. Coordinate the Reveal
         function startAllAnimations() {
-            if (hasAnimated || !githubData) return;
+            // If an API failure occurred or animations ran, do not trigger numeric counters
+            if (hasAnimated || fetchFailed || !githubData) return;
             hasAnimated = true;
 
             // Years Coding (Calculated locally)
             const startDate = new Date('2023-01-01');
             const years = Math.floor((new Date() - startDate) / (1000 * 60 * 60 * 24 * 365.25));
 
-            // Start all four simultaneously
+            // Start all four numeric counters simultaneously
             animateValue('stat-years', 0, years, 2000, "+");
             animateValue('stat-projects', 0, githubData.projectCount, 2000);
             animateValue('stat-commits', 0, githubData.commitCount, 2000);
@@ -288,14 +312,33 @@
                 if (!response.ok) throw new Error('API Error');
                 githubData = await response.json();
 
-                // Populate grid immediately (hidden until scrolled to, or just static)
+                // Populate grid immediately
                 renderProjectGrid(githubData.recentProjects);
 
                 // If the user is ALREADY looking at the stats when data arrives, start!
                 checkVisibilityAndStart();
             } catch (err) {
                 console.error('Fetch Error:', err);
-                githubData = { projectCount: 0, commitCount: 0, languageCount: 0 }; // Fallbacks
+
+                // Set error states to stop counting behaviors
+                fetchFailed = true;
+                githubData = { projectCount: 0, commitCount: 0, languageCount: 0 };
+
+                // --- THE FALLBACK IMPLEMENTATION ---
+                // Directly target and overwrite the values with "X"
+                const statIds = ['stat-years', 'stat-projects', 'stat-commits', 'stat-languages'];
+                statIds.forEach(id => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.innerHTML = "N/A";
+                    }
+                });
+
+                // Fallback grid message or container reset
+                const container = document.getElementById('projects-grid');
+                if (container) {
+                    container.innerHTML = '<p class="text-gray-400 text-sm col-span-full text-center py-8">Projects temporarily unavailable.</p>';
+                }
             }
         }
 
@@ -307,21 +350,21 @@
                 const card = document.createElement('div');
                 card.className = "p-6 bg-white/5 border border-white/10 rounded-xl hover:border-primary/50 transition-all duration-300 group";
                 card.innerHTML = `
-                <h3 class="text-white font-bold text-lg mb-2 group-hover:text-primary transition-colors">${repo.name}</h3>
-                <p class="text-gray-400 text-sm mb-6 line-clamp-2">${repo.description || 'Project details.'}</p>
-                <div class="flex items-center justify-between mt-auto">
-                    <span class="text-xs text-slate-500 uppercase tracking-widest">${repo.language || 'Code'}</span>
-                    <a href="${repo.html_url}" target="_blank" class="text-primary text-sm font-semibold flex items-center gap-1 hover:gap-2 transition-all">
-                        View Source <span class="material-symbols-outlined text-xs">arrow_forward</span>
-                    </a>
-                </div>`;
+            <h3 class="text-white font-bold text-lg mb-2 group-hover:text-primary transition-colors">${repo.name}</h3>
+            <p class="text-gray-400 text-sm mb-6 line-clamp-2">${repo.description || 'Project details.'}</p>
+            <div class="flex items-center justify-between mt-auto">
+                <span class="text-xs text-slate-500 uppercase tracking-widest">${repo.language || 'Code'}</span>
+                <a href="${repo.html_url}" target="_blank" class="text-primary text-sm font-semibold flex items-center gap-1 hover:gap-2 transition-all">
+                    View Source <span class="material-symbols-outlined text-xs">arrow_forward</span>
+                </a>
+            </div>`;
                 container.appendChild(card);
             });
         }
 
         // 4. Scroll Detection (Intersection Observer)
         function checkVisibilityAndStart() {
-            const statsSection = document.querySelector('.stats-container') || document.getElementById('stat-years').parentElement;
+            const statsSection = document.querySelector('.stats-container') || document.getElementById('stat-years')?.parentElement;
 
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
@@ -329,7 +372,7 @@
                         startAllAnimations();
                     }
                 });
-            }, { threshold: 0.2 }); // Trigger when 20% of the section is visible
+            }, { threshold: 0.2 });
 
             if (statsSection) observer.observe(statsSection);
         }
@@ -337,6 +380,26 @@
         document.addEventListener('DOMContentLoaded', () => {
             fetchGitHubData();
             checkVisibilityAndStart();
+        });
+    </script>
+
+    <!-- Technical Skills -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const cards = document.querySelectorAll('.dynamic-flashlight');
+
+            cards.forEach(card => {
+                card.addEventListener('mousemove', (e) => {
+                    const rect = card.getBoundingClientRect();
+                    // Calculate cursor positions isolated contextually within the active card component boundary
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+
+                    // Pipe updated runtime states back directly to local element scope references
+                    card.style.setProperty('--mouse-x', `${x}px`);
+                    card.style.setProperty('--mouse-y', `${y}px`);
+                });
+            });
         });
     </script>
 
@@ -369,26 +432,26 @@
                 forkCountBadge: document.getElementById('fork-count')
             };
 
-// --- 1. Fetch Data ---
-async function initProjects() {
-    showShimmer();
-    try {
-        const response = await fetch('/.netlify/functions/getGithubData');
-        const data = await response.json();
-        allProjects = data.projects || [];
+            // --- 1. Fetch Data ---
+            async function initProjects() {
+                showShimmer();
+                try {
+                    const response = await fetch('/.netlify/functions/getGithubData');
+                    const data = await response.json();
+                    allProjects = data.projects || [];
 
-        // Populate Language Dropdown
-        populateLanguages(data.allLanguages);
+                    // Populate Language Dropdown
+                    populateLanguages(data.allLanguages);
 
-        // Update the "Include Forks" count badge
-        updateForkBadge();
+                    // Update the "Include Forks" count badge
+                    updateForkBadge();
 
-        applyFilters();
-    } catch (err) {
-        console.error("Failed to load projects:", err);
-        
-        // Centered, interactive glass error card view
-        elements.container.innerHTML = `
+                    applyFilters();
+                } catch (err) {
+                    console.error("Failed to load projects:", err);
+
+                    // Centered, interactive glass error card view
+                    elements.container.innerHTML = `
             <div class="col-span-full flex flex-col items-center justify-center text-center py-12 px-4 max-w-md mx-auto">
                 <div class="w-12 h-12 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-400 mb-4 animate-pulse">
                     <span class="material-symbols-outlined text-2xl">error</span>
@@ -403,8 +466,8 @@ async function initProjects() {
                 </button>
             </div>
         `;
-    }
-}
+                }
+            }
 
             // --- 2. Filter & Sort Logic ---
             function applyFilters() {
@@ -435,7 +498,7 @@ async function initProjects() {
             }
 
             // --- 3. Rendering Logic ---
-function render() {
+            function render() {
                 // ADDED: Search & Filter Empty-State Logical Check
                 if (filteredProjects.length === 0) {
                     elements.container.className = "grid grid-cols-1 w-full";
@@ -668,6 +731,93 @@ function render() {
             background: #555;
         }
 
+        /* --- Shimmer effect for logo --- */
+
+        /* Container rules to constrain the shimmer layer */
+        .logo-shimmer-container {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        /* Constructing the realistic 30° metallic multi-streak reflection layer */
+        .logo-shimmer-container::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -150%;
+            /* Start safely off-screen left */
+            width: 100%;
+            height: 100%;
+
+            /* --- PROMINENT METALLIC GRADIENT UPDATES --- */
+            /* We elevated the opacities significantly (up to 85% and 70%) to make the reflection punchy */
+            background: linear-gradient(120deg,
+                    transparent 25%,
+                    rgba(255, 255, 255, 0.15) 35%,
+                    rgba(255, 255, 255, 0.55) 43%,
+                    /* Main bright light streak */
+                    rgba(255, 255, 255, 0.30) 48%,
+                    transparent 52%,
+                    rgba(255, 255, 255, 0.45) 57%,
+                    /* Secondary sharp streak */
+                    rgba(255, 255, 255, 0.10) 64%,
+                    transparent 72%);
+
+            pointer-events: none;
+            z-index: 20;
+            -webkit-user-select: none;
+            user-select: none;
+
+            /* --- BLEND MODE BOOST --- */
+            /* This forces the white shimmer to vividly ignite any colors or details 
+       underneath it, making it look intensely reflective instead of just flat white */
+            mix-blend-mode: overlay;
+
+            /* --- ALPHA CHANNEL MASKING --- */
+            -webkit-mask-image: url("./assets/images/DPText.png");
+            mask-image: url("./assets/images/DPText.png");
+            -webkit-mask-size: contain;
+            mask-size: contain;
+            -webkit-mask-repeat: no-repeat;
+            mask-repeat: no-repeat;
+            -webkit-mask-position: center;
+            mask-position: center;
+
+            /* Constant, smooth loop animation */
+            animation: multiShimmerSweep 8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
+
+        /* Keyframes adjusting for the 30° tilt angle coverage across the logo asset */
+        @keyframes multiShimmerSweep {
+            0% {
+                left: -150%;
+            }
+
+            100% {
+                left: 150%;
+            }
+        }
+
+        /* profile picture wrapper uses this one for the premium, slower look */
+        .animate-slide-slow {
+            opacity: 0;
+            animation: sideSlideIn 2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        /* Both classes share this exact same core definition without fighting over it */
+        @keyframes sideSlideIn {
+            0% {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
         /* --- Reusable Glassmorphism (Skills & Panels) --- */
         .glass-panel {
             background: rgba(16, 16, 25, 0.4);
@@ -760,6 +910,30 @@ function render() {
             transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
+        /* --- Technical Skills Section Flashlight Card Animation --- */
+
+        /* Flashlight spotlight hover effect styling overlay */
+        .dynamic-flashlight::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(350px circle at var(--mouse-x, 0px) var(--mouse-y, 0px),
+                    rgba(255, 255, 255, 0.08),
+                    transparent 80%);
+            z-10: 1;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        /* Activate illumination layer visibility when hover event happens */
+        .dynamic-flashlight:hover::before {
+            opacity: 1;
+        }
+
         /* --- Project Section Glass Inputs --- */
 
         /* --- Dedicated Search & Filter Styling --- */
@@ -815,44 +989,45 @@ function render() {
             border-color: rgba(11, 11, 217, 0.5) !important;
         }
 
-/* Apply the same glass style to Select dropdowns */
-select.glass-input {
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    
-    /* Clean, platform-agnostic centering properties */
-    text-align: center !important;
-    text-align-last: center !important;
-    
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    /* Positions the icon precisely on the right edge with safety clearance */
-    background-position: calc(100% - 0.75rem) center;
-    background-size: 1rem;
-    
-    /* Symmetric, tight padding prevents text from being pushed off-center */
-    padding-left: 1rem !important;
-    padding-right: 1.75rem !important; /* Tiny bit extra purely to clear the absolute arrow space */
-}
+        /* Apply the same glass style to Select dropdowns */
+        select.glass-input {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+
+            /* Clean, platform-agnostic centering properties */
+            text-align: center !important;
+            text-align-last: center !important;
+
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            /* Positions the icon precisely on the right edge with safety clearance */
+            background-position: calc(100% - 0.75rem) center;
+            background-size: 1rem;
+
+            /* Symmetric, tight padding prevents text from being pushed off-center */
+            padding-left: 1rem !important;
+            padding-right: 1.75rem !important;
+            /* Tiny bit extra purely to clear the absolute arrow space */
+        }
 
         /* This targets the dropdown list itself in many browsers */
-/* This overrides the native system overlay menu block alignment */
-/* Fixes the expanded system dropdown menu panel alignment */
-select.glass-input option {
-    background-color: #0f0f1a; /* Matches your darkest background hue */
-    color: white;
-    padding: 10px 0;
-    
-    /* Drops the RTL layout to fix the over-left drift and sets true center */
-    direction: ltr !important;
-    text-align: center !important;
-}
+        /* This overrides the native system overlay menu block alignment */
+        select.glass-input option {
+            background-color: #0f0f1a;
+            /* Matches your darkest background hue */
+            color: white;
+            padding: 10px 0;
 
-/* Re-adjust text behavior inside option text elements back to standard reading frame */
-select.glass-input option * {
-    direction: ltr;
-}
+            /* Drops the RTL layout to fix the over-left drift and sets true center */
+            direction: ltr !important;
+            text-align: center !important;
+        }
+
+        /* Re-adjust text behavior inside option text elements back to standard reading frame */
+        select.glass-input option * {
+            direction: ltr;
+        }
 
         /* Keep search text left-aligned since it has a magnifying glass icon */
         input#project-search.glass-input {
@@ -974,11 +1149,11 @@ select.glass-input option * {
     <!-- Ambient Background Effects -->
     <div class="fixed inset-0 z-[-1] overflow-hidden pointer-events-none">
         <div class="absolute inset-0 bg-noise opacity-30"></div>
-        <div class="orb w-[500px] h-[500px] bg-primary top-[-100px] left-[-100px] animate-orb-pulse"></div>
-        <div class="orb w-[450px] h-[450px] bg-aurora-pink bottom-[10%] right-[-100px] opacity-20 animate-orb-pulse">
+        <div class="orb w-[500px] h-[500px] bg-primary top-[-100px] left-[-100px] animate-orb-pulse-1"></div>
+        <div class="orb w-[450px] h-[450px] bg-aurora-pink bottom-[10%] right-[-100px] opacity-20 animate-orb-pulse-2">
         </div>
         <div
-            class="orb w-[600px] h-[600px] bg-aurora-purple top-[40%] left-[50%] transform -translate-x-1/2 opacity-20 animate-orb-pulse">
+            class="orb w-[600px] h-[600px] bg-aurora-purple top-[40%] left-[50%] transform -translate-x-1/2 opacity-20 animate-orb-pulse-3">
         </div>
     </div>
 
@@ -986,15 +1161,16 @@ select.glass-input option * {
     <nav class="fixed top-0 left-0 right-0 z-50 px-6 py-4">
         <div class="glass-panel max-w-6xl mx-auto rounded-full px-6 py-3 flex items-center justify-between relative">
 
-            <a class="flex items-center gap-2 group z-10" href="#">
+            <a class="logo-shimmer-container relative overflow-hidden flex items-center gap-2 group z-10 rounded-sm"
+                href="#">
+
                 <!-- <div
                     class="w-8 h-8 rounded-full overflow-hidden border border-white/10 flex items-center justify-center bg-gradient-to-br from-primary to-aurora-purple">
                     <img src="./assets/images/profilePicture.png" alt="Ishkar Singh"
                         class="w-full h-full object-cover" />
                 </div> -->
-
                 <img src="./assets/images/DPText.png" alt="Ishkar Singh"
-                    class="h-5 w-auto object-contain hidden sm:block brightness-90 opacity-80 group-hover:brightness-100 group-hover:opacity-100 transition-all duration-300" />
+                    class="logo-shimmer-image h-5 w-auto object-contain hidden sm:block brightness-90 opacity-80 group-hover:brightness-100 group-hover:opacity-100 transition-all duration-300" />
             </a>
 
             <div
@@ -1046,7 +1222,7 @@ select.glass-input option * {
             <div class="w-full flex flex-col md:flex-row items-center md:items-center justify-center gap-24 mb-16">
 
                 <div
-                    class="w-48 h-48 sm:w-64 sm:h-64 flex-shrink-0 rounded-full overflow-hidden border-4 border-white/10 shadow-2xl transition-all duration-500 hover:border-primary/50 relative group">
+                    class="animate-slide-slow w-48 h-48 sm:w-64 sm:h-64 flex-shrink-0 rounded-full overflow-hidden border-4 border-white/10 shadow-2xl transition-all duration-500 hover:border-primary/50 relative group">
                     <img src="./assets/images/profilePicture.png" alt="Ishkar Singh"
                         class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                 </div>
@@ -1143,154 +1319,177 @@ select.glass-input option * {
                 <span class="h-px flex-1 bg-gradient-to-l from-transparent to-white/20"></span>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div class="glass-card p-6 rounded-xl border border-white/10 bg-white/5">
-                    <div class="flex items-center gap-3 mb-6">
-                        <div class="p-2 bg-blue-500/10 rounded-lg text-blue-400">
-                            <span class="material-symbols-outlined">code</span>
+            <div class="skills-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                <div
+                    class="glass-card relative overflow-hidden p-6 rounded-xl border border-white/10 bg-white/5 dynamic-flashlight transition duration-300">
+                    <div class="relative z-10">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="p-2 bg-blue-500/10 rounded-lg text-blue-400">
+                                <span class="material-symbols-outlined">code</span>
+                            </div>
+                            <h3 class="text-lg font-semibold text-white">Programming Languages</h3>
                         </div>
-                        <h3 class="text-lg font-semibold text-white">Programming Languages</h3>
-                    </div>
-                    <div class="flex flex-wrap gap-2">
-                        <span
-                            class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">C#</span>
-                        <span
-                            class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">Java</span>
-                        <span
-                            class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">JavaScript</span>
-                        <span
-                            class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">SQL</span>
-                        <span
-                            class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">HTML</span>
-                        <span
-                            class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">CSS
-                            (Tailwind)</span>
+                        <div class="flex flex-wrap gap-2">
+                            <span
+                                class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">C#</span>
+                            <span
+                                class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">Java</span>
+                            <span
+                                class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">JavaScript</span>
+                            <span
+                                class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">SQL</span>
+                            <span
+                                class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">HTML</span>
+                            <span
+                                class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">CSS
+                                (Tailwind)</span>
+                        </div>
                     </div>
                 </div>
 
-                <div class="glass-card p-6 rounded-xl border border-white/10 bg-white/5">
-                    <div class="flex items-center gap-3 mb-6">
-                        <div class="p-2 bg-purple-500/10 rounded-lg text-purple-400">
-                            <span class="material-symbols-outlined">layers</span>
+                <div
+                    class="glass-card relative overflow-hidden p-6 rounded-xl border border-white/10 bg-white/5 dynamic-flashlight transition duration-300">
+                    <div class="relative z-10">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="p-2 bg-purple-500/10 rounded-lg text-purple-400">
+                                <span class="material-symbols-outlined">layers</span>
+                            </div>
+                            <h3 class="text-lg font-semibold text-white">Frameworks & Libraries</h3>
                         </div>
-                        <h3 class="text-lg font-semibold text-white">Frameworks & Libraries</h3>
-                    </div>
-                    <div class="flex flex-wrap gap-2">
-                        <span
-                            class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">ASP.NET</span>
-                        <span
-                            class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">MERN
-                            Stack</span>
-                        <span
-                            class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">React</span>
-                        <span
-                            class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">Vue.js</span>
-                        <span
-                            class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">WPF</span>
+                        <div class="flex flex-wrap gap-2">
+                            <span
+                                class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">ASP.NET</span>
+                            <span
+                                class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">MERN
+                                Stack</span>
+                            <span
+                                class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">React</span>
+                            <span
+                                class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">Vue.js</span>
+                            <span
+                                class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">WPF</span>
+                        </div>
                     </div>
                 </div>
 
-                <div class="glass-card p-6 rounded-xl border border-white/10 bg-white/5">
-                    <div class="flex items-center gap-3 mb-6">
-                        <div class="p-2 bg-emerald-500/10 rounded-lg text-emerald-400">
-                            <span class="material-symbols-outlined">database</span>
+                <div
+                    class="glass-card relative overflow-hidden p-6 rounded-xl border border-white/10 bg-white/5 dynamic-flashlight transition duration-300">
+                    <div class="relative z-10">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="p-2 bg-emerald-500/10 rounded-lg text-emerald-400">
+                                <span class="material-symbols-outlined">database</span>
+                            </div>
+                            <h3 class="text-lg font-semibold text-white">Databases</h3>
                         </div>
-                        <h3 class="text-lg font-semibold text-white">Databases</h3>
-                    </div>
-                    <div class="flex flex-wrap gap-2">
-                        <span
-                            class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">MySQL</span>
-                        <span
-                            class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">MS
-                            SQL Server</span>
-                        <span
-                            class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">MongoDB</span>
-                        <span
-                            class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">Oracle
-                            SQL</span>
+                        <div class="flex flex-wrap gap-2">
+                            <span
+                                class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">MySQL</span>
+                            <span
+                                class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">MS
+                                SQL Server</span>
+                            <span
+                                class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">MongoDB</span>
+                            <span
+                                class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">Oracle
+                                SQL</span>
+                        </div>
                     </div>
                 </div>
 
-                <div class="glass-card p-6 rounded-xl border border-white/10 bg-white/5">
-                    <div class="flex items-center gap-3 mb-6">
-                        <div class="p-2 bg-orange-500/10 rounded-lg text-orange-400">
-                            <span class="material-symbols-outlined">cloud_done</span>
+                <div
+                    class="glass-card relative overflow-hidden p-6 rounded-xl border border-white/10 bg-white/5 dynamic-flashlight transition duration-300">
+                    <div class="relative z-10">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="p-2 bg-orange-500/10 rounded-lg text-orange-400">
+                                <span class="material-symbols-outlined">cloud_done</span>
+                            </div>
+                            <h3 class="text-lg font-semibold text-white">Cloud & DevOps</h3>
                         </div>
-                        <h3 class="text-lg font-semibold text-white">Cloud & DevOps</h3>
-                    </div>
-                    <div class="flex flex-wrap gap-2">
-                        <span
-                            class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">Microsoft
-                            Azure</span>
-                        <span
-                            class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">Docker</span>
-                        <span
-                            class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">CI/CD</span>
-                        <span
-                            class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">GitHub
-                            Actions</span>
+                        <div class="flex flex-wrap gap-2">
+                            <span
+                                class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">Microsoft
+                                Azure</span>
+                            <span
+                                class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">Docker</span>
+                            <span
+                                class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">CI/CD</span>
+                            <span
+                                class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">GitHub
+                                Actions</span>
+                        </div>
                     </div>
                 </div>
 
-                <div class="glass-card p-6 rounded-xl border border-white/10 bg-white/5">
-                    <div class="flex items-center gap-3 mb-6">
-                        <div class="p-2 bg-pink-500/10 rounded-lg text-pink-400">
-                            <span class="material-symbols-outlined">api</span>
+                <div
+                    class="glass-card relative overflow-hidden p-6 rounded-xl border border-white/10 bg-white/5 dynamic-flashlight transition duration-300">
+                    <div class="relative z-10">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="p-2 bg-pink-500/10 rounded-lg text-pink-400">
+                                <span class="material-symbols-outlined">api</span>
+                            </div>
+                            <h3 class="text-lg font-semibold text-white">APIs & Tools</h3>
                         </div>
-                        <h3 class="text-lg font-semibold text-white">APIs & Tools</h3>
-                    </div>
-                    <div class="flex flex-wrap gap-2">
-                        <span
-                            class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">RESTful
-                            APIs</span>
-                        <span
-                            class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">Postman</span>
-                        <span
-                            class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">Swagger</span>
+                        <div class="flex flex-wrap gap-2">
+                            <span
+                                class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">RESTful
+                                APIs</span>
+                            <span
+                                class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">Postman</span>
+                            <span
+                                class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">Swagger</span>
+                        </div>
                     </div>
                 </div>
 
-                <div class="glass-card p-6 rounded-xl border border-white/10 bg-white/5">
-                    <div class="flex items-center gap-3 mb-6">
-                        <div class="p-2 bg-cyan-500/10 rounded-lg text-cyan-400">
-                            <span class="material-symbols-outlined">terminal</span>
+                <div
+                    class="glass-card relative overflow-hidden p-6 rounded-xl border border-white/10 bg-white/5 dynamic-flashlight transition duration-300">
+                    <div class="relative z-10">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="p-2 bg-cyan-500/10 rounded-lg text-cyan-400">
+                                <span class="material-symbols-outlined">terminal</span>
+                            </div>
+                            <h3 class="text-lg font-semibold text-white">Development Tools</h3>
                         </div>
-                        <h3 class="text-lg font-semibold text-white">Development Tools</h3>
-                    </div>
-                    <div class="flex flex-wrap gap-2">
-                        <span
-                            class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">Git/GitHub</span>
-                        <span
-                            class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">Visual
-                            Studio</span>
-                        <span
-                            class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">VS
-                            Code</span>
-                        <span
-                            class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">NetBeans</span>
-                        <span
-                            class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">Linux</span>
+                        <div class="flex flex-wrap gap-2">
+                            <span
+                                class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">Git/GitHub</span>
+                            <span
+                                class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">Visual
+                                Studio</span>
+                            <span
+                                class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">VS
+                                Code</span>
+                            <span
+                                class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">NetBeans</span>
+                            <span
+                                class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">Linux</span>
+                        </div>
                     </div>
                 </div>
 
-                <div class="glass-card p-6 rounded-xl border border-white/10 bg-white/5 lg:col-span-3">
-                    <div class="flex items-center gap-3 mb-6">
-                        <div class="p-2 bg-yellow-500/10 rounded-lg text-yellow-400">
-                            <span class="material-symbols-outlined">history_edu</span>
+                <div
+                    class="glass-card relative overflow-hidden p-6 rounded-xl border border-white/10 bg-white/5 lg:col-span-3 dynamic-flashlight transition duration-300">
+                    <div class="relative z-10">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="p-2 bg-yellow-500/10 rounded-lg text-yellow-400">
+                                <span class="material-symbols-outlined">history_edu</span>
+                            </div>
+                            <h3 class="text-lg font-semibold text-white">Software Engineering Practices</h3>
                         </div>
-                        <h3 class="text-lg font-semibold text-white">Software Engineering Practices</h3>
-                    </div>
-                    <div class="flex flex-wrap gap-2">
-                        <span
-                            class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">Agile
-                            (Scrum)</span>
-                        <span
-                            class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">SDLC</span>
-                        <span
-                            class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">Technical
-                            Documentation</span>
+                        <div class="flex flex-wrap gap-2">
+                            <span
+                                class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">Agile
+                                (Scrum)</span>
+                            <span
+                                class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">SDLC</span>
+                            <span
+                                class="px-3 py-1 text-xs font-medium rounded-full bg-white/5 border border-white/10 text-slate-300">Technical
+                                Documentation</span>
+                        </div>
                     </div>
                 </div>
+
             </div>
         </section>
 
@@ -1532,79 +1731,68 @@ select.glass-input option * {
         </section>
 
         <!-- Contact Section -->
-        <section class="max-w-2xl w-full py-20 scroll-mt-24" id="contact">
-            <div class="flex items-center gap-4 mb-10 px-2">
-                <span class="h-px flex-1 bg-gradient-to-r from-transparent to-white/20"></span>
-                <h2 class="text-3xl font-bold text-white">Let's Connect</h2>
-                <span class="h-px flex-1 bg-gradient-to-l from-transparent to-white/20"></span>
-            </div>
-            <div class="glass-panel p-8 sm:p-12 rounded-2xl text-center">
-                <!-- <h2 class="text-3xl font-bold text-white mb-4">Let's Connect</h2> -->
-                <p class="text-slate-400 mb-8 max-w-md mx-auto">
-                    Currently looking for new opportunities. Whether you have a question or just want to say hi, my
-                    inbox is always open.
-                </p>
-                <form class="flex flex-col gap-4 text-left max-w-sm mx-auto mb-8">
-                    <div>
-                        <label class="sr-only" for="email">Email Address</label>
-                        <div class="relative">
-                            <div
-                                class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
-                                <span class="material-symbols-outlined text-[20px]">mail</span>
-                            </div>
-                            <input
-                                class="w-full pl-10 pr-4 py-3 bg-background-dark/50 border border-white/10 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary outline-none text-white placeholder-slate-600 transition-all"
-                                id="email" placeholder="your@email.com" type="email" />
+<section class="max-w-5xl w-full py-20 scroll-mt-24 mx-auto" id="contact">
+    <div class="flex items-center gap-4 mb-10 px-2">
+        <span class="h-px flex-1 bg-gradient-to-r from-transparent to-white/20"></span>
+        <h2 class="text-3xl font-bold text-white">Let's Connect</h2>
+        <span class="h-px flex-1 bg-gradient-to-l from-transparent to-white/20"></span>
+    </div>
+    
+    <div class="glass-panel p-8 sm:p-12 rounded-2xl">
+        <p class="text-slate-400 mb-10 max-w-xl mx-auto text-center">
+            Looking for a collaborator, a developer, or just want to chat about a project? Drop me a message.
+        </p>
+        
+        <form class="flex flex-col gap-5 text-left w-full max-w-3xl mx-auto">
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div>
+                    <label class="sr-only" for="name">Full Name</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
+                            <span class="material-symbols-outlined text-[20px]">person</span>
                         </div>
+                        <input
+                            class="w-full pl-10 pr-4 py-3 bg-background-dark/50 border border-white/10 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary outline-none text-white placeholder-slate-600 transition-all"
+                            id="name" placeholder="Your Name" type="text" required />
                     </div>
-                    <div>
-                        <label class="sr-only" for="message">Message</label>
-                        <div class="relative">
-                            <div class="absolute top-3 left-0 pl-3 flex items-start pointer-events-none text-slate-500">
-                                <span class="material-symbols-outlined text-[20px]">chat</span>
-                            </div>
-                            <textarea
-                                class="w-full pl-10 pr-4 py-3 bg-background-dark/50 border border-white/10 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary outline-none text-white placeholder-slate-600 transition-all"
-                                id="message" placeholder="Hello Alex, I'd like to discuss..." rows="4"></textarea>
+                </div>
+
+                <div>
+                    <label class="sr-only" for="email">Email Address</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
+                            <span class="material-symbols-outlined text-[20px]">mail</span>
                         </div>
+                        <input
+                            class="w-full pl-10 pr-4 py-3 bg-background-dark/50 border border-white/10 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary outline-none text-white placeholder-slate-600 transition-all"
+                            id="email" placeholder="your@email.com" type="email" required />
                     </div>
-                    <button
-                        class="w-full py-3 bg-primary hover:bg-blue-700 text-white font-bold rounded-lg transition-colors shadow-lg shadow-blue-900/20"
-                        type="button">
-                        Send Message
-                    </button>
-                </form>
-                <div class="flex justify-center gap-6">
-                    <a class="p-3 bg-white/5 rounded-full hover:bg-white/10 hover:text-primary transition-all text-slate-400 border border-white/5"
-                        href="#">
-                        <span class="sr-only">GitHub</span>
-                        <svg aria-hidden="true" class="w-5 h-5 fill-current" viewbox="0 0 24 24">
-                            <path clip-rule="evenodd"
-                                d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
-                                fill-rule="evenodd"></path>
-                        </svg>
-                    </a>
-                    <a class="p-3 bg-white/5 rounded-full hover:bg-white/10 hover:text-blue-500 transition-all text-slate-400 border border-white/5"
-                        href="#">
-                        <span class="sr-only">LinkedIn</span>
-                        <svg aria-hidden="true" class="w-5 h-5 fill-current" viewbox="0 0 24 24">
-                            <path clip-rule="evenodd"
-                                d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"
-                                fill-rule="evenodd"></path>
-                        </svg>
-                    </a>
-                    <a class="p-3 bg-white/5 rounded-full hover:bg-white/10 hover:text-pink-500 transition-all text-slate-400 border border-white/5"
-                        href="#">
-                        <span class="sr-only">Twitter/X</span>
-                        <svg aria-hidden="true" class="w-5 h-5 fill-current" viewbox="0 0 24 24">
-                            <path
-                                d="M13.6823 10.6218L20.2391 3H18.6854L12.9921 9.61788L8.44486 3H3.2002L10.0765 13.0074L3.2002 21H4.75404L10.7663 14.0113L15.5685 21H20.8131L13.6819 10.6218H13.6823ZM11.5541 13.0956L10.8574 12.0991L5.31391 4.16971H7.70053L12.1742 10.5689L12.8709 11.5655L18.6861 19.8835H16.2995L11.5541 13.096V13.0956Z">
-                            </path>
-                        </svg>
-                    </a>
                 </div>
             </div>
-        </section>
+
+            <div>
+                <label class="sr-only" for="message">Message</label>
+                <div class="relative">
+                    <div class="absolute top-3 left-0 pl-3 flex items-start pointer-events-none text-slate-500">
+                        <span class="material-symbols-outlined text-[20px]">chat</span>
+                    </div>
+                    <textarea
+                        class="w-full pl-10 pr-4 py-3 bg-background-dark/50 border border-white/10 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary outline-none text-white placeholder-slate-600 transition-all min-h-[150px] resize-y"
+                        id="message" placeholder="Hello Ishkar, I'd like to discuss..." rows="5" required></textarea>
+                </div>
+            </div>
+
+            <div class="flex justify-end mt-2">
+                <button
+                    class="w-full md:w-auto px-8 py-3.5 bg-primary hover:bg-blue-700 text-white font-bold rounded-lg transition-all shadow-lg shadow-blue-900/20 active:scale-[0.98] cursor-pointer"
+                    type="submit">
+                    Send Message
+                </button>
+            </div>
+        </form>
+    </div>
+</section>
     </main>
 
     <footer class="relative z-10 border-t border-white/5 bg-background-dark py-8 text-center">
