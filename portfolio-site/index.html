@@ -52,7 +52,7 @@
                     },
                     keyframes: {
                         orbPulse: {
-                            '0%, 100%': { opacity: '0.525' },
+                            '0%, 100%': { opacity: '0.53' },
                             '50%': { opacity: '0.4' }
                         }
                     },
@@ -718,52 +718,129 @@
             const contactForm = document.getElementById('portfolioContactForm');
 
             if (contactForm) {
+                const submitButton = document.getElementById('submitBtn');
+                const submitButtonText = document.getElementById('submitBtnText');
+
+                // Explicitly separate arrays of classes to manage state toggles without collision
+                const normalClasses = ['group', 'bg-primary', 'hover:shadow-[0_0_50px_0px_rgba(13,13,242,0.8)]'];
+                const errorClasses = ['bg-red-600', 'animate-shake']; // No shimmer group, no glow
+                const successClasses = ['bg-green-600'/*, 'hover:shadow-[0_0_50px_0px_rgba(22,163,74,0.8)]'*/];
+
+                let stateTimeout = null;
+
                 contactForm.addEventListener('submit', async (event) => {
-                    event.preventDefault(); // Stop the browser from executing a standard page reload
+                    event.preventDefault();
 
-                    // Target the button inside the form wrapper to apply loading feedback
-                    const submitButton = contactForm.querySelector('button[type="submit"]');
-                    const originalButtonText = submitButton.innerHTML;
+                    if (stateTimeout) clearTimeout(stateTimeout);
 
-                    // Update UI State: Inform the user and block double execution
+                    const nameInput = document.getElementById('name');
+                    const emailInput = document.getElementById('email');
+                    const messageInput = document.getElementById('message');
+                    const inputsList = [nameInput, emailInput, messageInput];
+
+                    // Wipe old border validation layouts
+                    inputsList.forEach(el => el.classList.remove('border-red-500', 'focus:border-red-500'));
+
+                    const nameVal = nameInput.value.trim();
+                    const emailVal = emailInput.value.trim();
+                    const messageVal = messageInput.value.trim();
+
+                    let targetedRedFields = [];
+                    let buttonFeedbackText = "";
+
+                    // --- VALIDATION TREE PRIORITY CODES ---
+                    if (!nameVal || !emailVal || !messageVal) {
+                        if (!nameVal) targetedRedFields.push(nameInput);
+                        if (!emailVal) targetedRedFields.push(emailInput);
+                        if (!messageVal) targetedRedFields.push(messageMessageInput = messageInput);
+                        buttonFeedbackText = "Please fill out the highlighted fields correctly.";
+                    }
+                    else if (!emailVal.includes('@')) {
+                        targetedRedFields.push(emailInput);
+                        buttonFeedbackText = "Please ensure your email contains an '@' symbol.";
+                    }
+                    else {
+                        const validationPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                        if (!validationPattern.test(emailVal)) {
+                            targetedRedFields.push(emailInput);
+                            buttonFeedbackText = "Please enter a valid email address (e.g. name@gmail.com).";
+                        }
+                    }
+
+                    // --- ACTIONS FOR ERROR DETECTED ---
+                    if (targetedRedFields.length > 0) {
+                        targetedRedFields.forEach(field => {
+                            field.classList.add('border-red-500', 'focus:border-red-500');
+                        });
+
+                        // Decisively drop blue, inject flat red theme styles
+                        submitButton.classList.remove(...normalClasses);
+                        submitButton.classList.add(...errorClasses);
+                        submitButtonText.innerText = buttonFeedbackText;
+
+                        // Enforce 5-second automatic layout recovery loop
+                        stateTimeout = setTimeout(() => {
+                            targetedRedFields.forEach(field => {
+                                field.classList.remove('border-red-500', 'focus:border-red-500');
+                            });
+                            submitButton.classList.remove(...errorClasses);
+                            submitButton.classList.add(...normalClasses);
+                            submitButtonText.innerText = "Send Message";
+                        }, 5000);
+
+                        return; // Stop form submission
+                    }
+
+                    // --- VALIDATION PASSED: INITIATE API BACKEND FETCH ---
                     submitButton.disabled = true;
-                    submitButton.innerHTML = 'Sending...';
+                    submitButtonText.innerText = 'Sending...';
 
-                    // Extract the user values dynamically from the input IDs
-                    const payloadData = {
-                        name: document.getElementById('name').value,
-                        email: document.getElementById('email').value,
-                        message: document.getElementById('message').value
+                    const dataPackage = {
+                        name: nameVal,
+                        email: emailVal,
+                        message: messageVal
                     };
 
                     try {
-                        // Submit data to Netlify serverless function mapping standard architecture
                         const response = await fetch('/.netlify/functions/sendEmail', {
                             method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify(payloadData)
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(dataPackage)
                         });
 
-                        const dataResult = await response.json();
+                        const parsedResult = await response.json();
 
                         if (response.ok) {
-                            // Success handling
-                            alert('Thank you! Your message has been sent successfully.');
-                            contactForm.reset(); // Safely wipes form field values clean
+                            // Success Confirmation state
+                            submitButton.classList.remove(...normalClasses);
+                            submitButton.classList.add(...successClasses);
+                            submitButtonText.innerText = 'Thank you! Message Sent Successfully.';
+                            contactForm.reset();
+
+                            setTimeout(() => {
+                                submitButton.classList.remove(...successClasses);
+                                submitButton.classList.add(...normalClasses);
+                                submitButtonText.innerText = "Send Message";
+                                submitButton.disabled = false;
+                            }, 5000);
+
                         } else {
-                            // Server returned an explicit error response message (e.g. Validation issues)
-                            alert(`Submission failed: ${dataResult.error || 'Please try again later.'}`);
+                            throw new Error(parsedResult.error || "Function rejected wrapper");
                         }
-                    } catch (error) {
-                        // Catches environmental runtime network issues
-                        console.error('Network contact submission error:', error);
-                        alert('Could not connect to the mail server. Please verify your internet connection.');
-                    } finally {
-                        // Re-enable button state whether request passes or fails
-                        submitButton.disabled = false;
-                        submitButton.innerHTML = originalButtonText;
+                    } catch (err) {
+                        console.error('Submission mistake:', err);
+
+                        // Fallback to error UI layout if function encounters server error
+                        submitButton.classList.remove(...normalClasses);
+                        submitButton.classList.add(...errorClasses);
+                        submitButtonText.innerText = "Server Error. Please try again later.";
+
+                        setTimeout(() => {
+                            submitButton.classList.remove(...errorClasses);
+                            submitButton.classList.add(...normalClasses);
+                            submitButtonText.innerText = "Send Message";
+                            submitButton.disabled = false;
+                        }, 4000);
                     }
                 });
             }
@@ -843,7 +920,7 @@
             mask-position: center;
 
             /* Constant, smooth loop animation */
-            animation: multiShimmerSweep 8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+            animation: multiShimmerSweep 7s cubic-bezier(0.4, 0, 0.2, 1) infinite;
         }
 
         /* Keyframes adjusting for the 30° tilt angle coverage across the logo asset */
@@ -1197,6 +1274,27 @@
             font-size: 0.75rem;
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
+
+        /* --- Contact form button shake --- */
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-4px);
+            }
+
+            75% {
+                transform: translateX(4px);
+            }
+        }
+
+        .animate-shake {
+            animation: shake 0.2s ease-in-out 0s 2;
+        }
     </style>
 
 </head>
@@ -1276,25 +1374,20 @@
     <main class="relative z-10 flex flex-col items-center w-full pt-32 px-4 sm:px-6">
         <!-- Landing/Home Page -->
         <section class="max-w-6xl w-full flex flex-col items-center py-16 sm:py-24 animate-fade-in-up">
-
             <div class="w-full flex flex-col md:flex-row items-center md:items-center justify-center gap-24 mb-16">
-
                 <div
                     class="animate-slide-slow w-48 h-48 sm:w-64 sm:h-64 flex-shrink-0 rounded-full overflow-hidden border-4 border-white/10 shadow-2xl transition-all duration-500 hover:border-primary/50 relative group">
                     <img src="./assets/images/profilePicture.png" alt="Ishkar Singh"
                         class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                 </div>
-
                 <div class="flex flex-col items-center md:items-start text-center md:text-left max-w-[46rem]">
                     <h1
                         class="text-3xl sm:text-4xl lg:text-[52px] font-bold tracking-tight text-white leading-tight whitespace-nowrap">
                         Bachelor of Computer Science
                     </h1>
-
                     <div class="w-full flex items-center gap-4 my-4">
                         <span class="h-px flex-1 bg-white/20"></span>
                     </div>
-
                     <p
                         class="text-2xl sm:text-4xl font-semibold tracking-tight flex flex-wrap items-baseline gap-x-2 mb-4">
                         <span class="animate-container relative">
@@ -1302,19 +1395,18 @@
                         </span>
                         <span class="text-gradient-aurora">Enthusiast</span>
                     </p>
-
                     <p id="scramble-text"
                         class="text-xl sm:text-2xl font-medium text-[#a6a6a6] mb-4 leading-snug min-h-[1.5em]">
                         Curious. Analytical. Persistent.
                     </p>
-
                     <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto mt-4">
-<a class="group relative px-8 py-3.5 bg-primary text-white font-semibold rounded-lg overflow-hidden transition-all hover:shadow-[0_0_45px_-10px_rgba(13,13,242,0.6)] flex items-center justify-center cursor-pointer"
-   href="#projects">
-    <div class="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/60 to-transparent -translate-x-full group-hover:animate-[shimmer_1s_infinite]">
-    </div>
-    <span>View Projects</span>
-</a>
+                        <a class="group relative px-8 py-3.5 bg-primary text-white font-semibold rounded-lg overflow-hidden transition-all hover:shadow-[0_0_45px_-10px_rgba(13,13,242,0.6)] flex items-center justify-center cursor-pointer"
+                            href="#projects">
+                            <div
+                                class="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/60 to-transparent -translate-x-full group-hover:animate-[shimmer_1s_infinite]">
+                            </div>
+                            <span>View Projects</span>
+                        </a>
                         <a class="px-8 py-3.5 bg-white/5 border border-white/10 text-white font-semibold rounded-lg hover:bg-white/10 transition-all flex items-center justify-center gap-2"
                             href="#contact">
                             <span>Contact Me</span>
@@ -1348,7 +1440,7 @@
         </section>
 
         <!-- About Me Section -->
-        <section class="max-w-5xl w-full py-16 scroll-mt-24" id="about">
+        <section class="max-w-6xl w-full py-16 scroll-mt-24" id="about">
             <div class="flex items-center gap-4 mb-10 px-2">
                 <span class="h-px flex-1 bg-gradient-to-r from-transparent to-white/20"></span>
                 <h2 class="text-3xl font-bold text-white">About Me</h2>
@@ -1616,6 +1708,7 @@
                 <h2 class="text-3xl font-bold text-white">Professional Background</h2>
                 <span class="h-px flex-1 bg-gradient-to-l from-transparent to-white/20"></span>
             </div>
+
             <div class="flex flex-col gap-8">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
                     <div>
@@ -1715,19 +1808,6 @@
                                         <span class="material-symbols-outlined text-sm text-amber-400">trophy</span>
                                         Honors &amp; Awards
                                     </p>
-
-                                    <!-- <div
-                                        class="flex items-center gap-3 p-3 bg-white/5 rounded-lg border border-white/5">
-                                        <img src="assets/images/gks.png"
-                                            alt="Golden Key International Honour Society Logo"
-                                            class="w-8 h-8 rounded object-contain bg-white/5" />
-                                        <div>
-                                            <p class="text-sm font-semibold text-white">Golden Key International Honour
-                                                Society Award</p>
-                                            <p class="text-xs text-slate-500">Recognized for Top 15% in academic
-                                                excellence</p>
-                                        </div>
-                                    </div> -->
                                     <a href="https://golden-key-international-honou.verified.cv/en/verify/00258436574822"
                                         target="_blank" rel="noopener noreferrer"
                                         class="flex items-center gap-3 p-3 bg-white/5 rounded-lg border border-white/5 hover:bg-white/10 transition-colors duration-200 group">
@@ -1788,20 +1868,17 @@
         </section>
 
         <!-- Contact Section -->
-        <section class="max-w-5xl w-full py-20 scroll-mt-24 mx-auto" id="contact">
+        <section class="max-w-6xl w-full py-20 scroll-mt-24 mx-auto" id="contact">
             <div class="flex items-center gap-4 mb-10 px-2">
                 <span class="h-px flex-1 bg-gradient-to-r from-transparent to-white/20"></span>
                 <h2 class="text-3xl font-bold text-white">Let's Connect</h2>
                 <span class="h-px flex-1 bg-gradient-to-l from-transparent to-white/20"></span>
             </div>
-
             <div class="glass-panel p-8 sm:p-12 rounded-2xl">
-                <p class="text-slate-400 mb-10 max-w-xl mx-auto text-center">
+                <p class="text-slate-400 mb-10 max-w-3xl mx-auto text-center">
                     Looking for a collaborator, a developer, or just want to chat about a project? Drop me a message.
                 </p>
-
-                <form id="portfolioContactForm" class="flex flex-col gap-5 text-left w-full max-w-3xl mx-auto">
-
+                <form id="portfolioContactForm" class="flex flex-col gap-5 text-left w-full mx-auto" novalidate>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div>
                             <label class="sr-only" for="name">Full Name</label>
@@ -1811,11 +1888,10 @@
                                     <span class="material-symbols-outlined text-[20px]">person</span>
                                 </div>
                                 <input
-                                    class="w-full pl-10 pr-4 py-3 bg-background-dark/50 border border-white/10 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary outline-none text-white placeholder-slate-600 transition-all"
+                                    class="w-full pl-10 pr-4 py-3 bg-background-dark/50 border border-white/10 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary outline-none text-white placeholder-slate-600 transition-all duration-300"
                                     id="name" placeholder="Your Name" type="text" autocomplete="name" required />
                             </div>
                         </div>
-
                         <div>
                             <label class="sr-only" for="email">Email Address</label>
                             <div class="relative">
@@ -1824,13 +1900,12 @@
                                     <span class="material-symbols-outlined text-[20px]">mail</span>
                                 </div>
                                 <input
-                                    class="w-full pl-10 pr-4 py-3 bg-background-dark/50 border border-white/10 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary outline-none text-white placeholder-slate-600 transition-all"
+                                    class="w-full pl-10 pr-4 py-3 bg-background-dark/50 border border-white/10 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary outline-none text-white placeholder-slate-600 transition-all duration-300"
                                     id="email" placeholder="your@email.com" type="email" autocomplete="email"
                                     required />
                             </div>
                         </div>
                     </div>
-
                     <div>
                         <label class="sr-only" for="message">Message</label>
                         <div class="relative">
@@ -1838,32 +1913,34 @@
                                 <span class="material-symbols-outlined text-[20px]">chat</span>
                             </div>
                             <textarea
-                                class="w-full pl-10 pr-4 py-3 bg-background-dark/50 border border-white/10 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary outline-none text-white placeholder-slate-600 transition-all min-h-[150px] resize-y"
+                                class="w-full pl-10 pr-4 py-3 bg-background-dark/50 border border-white/10 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary outline-none text-white placeholder-slate-600 transition-all duration-300 min-h-[160px] resize-y"
                                 id="message" placeholder="Hello Ishkar, I'd like to discuss..." rows="5"
                                 required></textarea>
                         </div>
                     </div>
+                    <div class="w-full mt-2">
+                        <button id="submitBtn"
+                            class="group relative w-full py-3.5 bg-primary hover:shadow-[0_0_40px_-9px_rgba(13,13,242,0.7)] text-white font-bold rounded-lg overflow-hidden transition-all duration-300 active:scale-[0.99] cursor-pointer disabled:cursor-not-allowed flex items-center justify-center"
+                            type="submit">
 
-<div class="w-full mt-2">
-    <button
-        class="group relative w-full py-3.5 bg-primary text-white font-bold rounded-lg overflow-hidden transition-all hover:shadow-[0_0_40px_-10px_rgba(13,13,242,0.6)] active:scale-[0.99] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-        type="submit">
-        
-        <div class="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover:animate-[shimmer_1s_infinite]">
-        </div>
-        
-        <span class="relative z-10">Send Message</span>
-    </button>
-</div>
+                            <div
+                                class="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover:animate-[shimmer_1s_infinite]">
+                            </div>
+
+                            <span id="submitBtnText" class="relative z-10">Send Message</span>
+                        </button>
+                    </div>
                 </form>
             </div>
         </section>
+
     </main>
 
-    <footer class="relative z-10 border-t border-white/5 bg-background-dark py-8 text-center">
+    <footer class="glass-panel w-full relative z-10 py-8 text-center border-t border-white/5">
         <div class="space-y-2">
             <p class="text-sm text-slate-400">
-                &copy; <span id="year">2026</span> Ishkar Singh. All rights reserved.
+                Copyright &copy; <span id="year"></span> Ishkar Singh. All rights reserved. | Built with passion and
+                code.
             </p>
             <!-- <p class="text-xs text-slate-600">
                 Powered by the GitHub &amp; Brevo APIs
