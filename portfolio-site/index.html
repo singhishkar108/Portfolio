@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html class="dark" lang="en">
 
 <head>
@@ -34,37 +34,116 @@
                         "background-dark": "#050505",
                         "surface-dark": "#101015",
                         "glass-border": "rgba(255, 255, 255, 0.08)",
-                        "glass-bg": "rgba(10, 10, 15, 0.6)"
+                        "glass-bg": "rgba(10, 10, 15, 0.6)",
                     },
                     fontFamily: {
-                        "display": ["Inter", "sans-serif"]
+                        display: ["Inter", "sans-serif"],
                     },
                     borderRadius: {
-                        "DEFAULT": "0.5rem",
-                        "lg": "1rem",
-                        "xl": "1.5rem",
+                        DEFAULT: "0.5rem",
+                        lg: "1rem",
+                        xl: "1.5rem",
                         "2xl": "2rem",
-                        "full": "9999px"
+                        full: "9999px",
                     },
                     backgroundImage: {
-                        'aurora-gradient':
-                            'radial-gradient(circle at 50% 0%, rgba(139, 92, 246, 0.15), transparent 50%), radial-gradient(circle at 100% 0%, rgba(236, 72, 153, 0.15), transparent 50%), radial-gradient(circle at 0% 0%, rgba(13, 13, 242, 0.15), transparent 50%)'
+                        "aurora-gradient":
+                            "radial-gradient(circle at 50% 0%, rgba(139, 92, 246, 0.15), transparent 50%), radial-gradient(circle at 100% 0%, rgba(236, 72, 153, 0.15), transparent 50%), radial-gradient(circle at 0% 0%, rgba(13, 13, 242, 0.15), transparent 50%)",
                     },
                     keyframes: {
                         orbPulse: {
-                            '0%, 100%': { opacity: '0.53' },
-                            '50%': { opacity: '0.4' }
-                        }
+                            "0%, 100%": { opacity: "0.5" },
+                            "50%": { opacity: "0.4" },
+                        },
                     },
                     /* --- STAGGERED ANIMATIONS SETUP --- */
                     animation: {
-                        'orb-pulse-1': 'orbPulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                        'orb-pulse-2': 'orbPulse 3.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                        'orb-pulse-3': 'orbPulse 4.5s cubic-bezier(0.4, 0, 0.6, 1) infinite'
-                    }
+                        "orb-pulse-1":
+                            "orbPulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+                        "orb-pulse-2":
+                            "orbPulse 3.5s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+                        "orb-pulse-3":
+                            "orbPulse 4.5s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+                    },
+                },
+            },
+        };
+    </script>
+
+    <!-- Navbar -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const menuToggle = document.getElementById("mobile-menu-toggle");
+            const dropdown = document.getElementById("mobile-dropdown");
+            const navLinks = document.querySelectorAll(".mobile-nav-link");
+
+            // Hamburger icon parts
+            const hTop = document.getElementById("hamburger-top");
+            const hMid = document.getElementById("hamburger-mid");
+            const hBot = document.getElementById("hamburger-bot");
+
+            function toggleMenu() {
+                const isOpen = dropdown.classList.contains("scale-y-100");
+
+                if (isOpen) {
+                    // Close State Configuration
+                    dropdown.classList.remove(
+                        "scale-y-100",
+                        "opacity-100",
+                        "pointer-events-auto",
+                    );
+                    dropdown.classList.add(
+                        "scale-y-0",
+                        "opacity-0",
+                        "pointer-events-none",
+                    );
+
+                    // Icon Reset
+                    hTop.classList.remove("rotate-45", "translate-y-[2px]");
+                    hBot.classList.remove("-rotate-45", "-translate-y-[2px]");
+                    hMid.classList.remove("opacity-0", "scale-x-0");
+                    hTop.classList.add("-translate-y-0.5");
+                    hBot.classList.add("translate-y-0.5");
+                } else {
+                    // Open State Configuration
+                    dropdown.classList.remove(
+                        "scale-y-0",
+                        "opacity-0",
+                        "pointer-events-none",
+                    );
+                    dropdown.classList.add(
+                        "scale-y-100",
+                        "opacity-100",
+                        "pointer-events-auto",
+                    );
+
+                    // Icon Transform to 'X'
+                    hTop.classList.remove("-translate-y-0.5");
+                    hBot.classList.remove("translate-y-0.5");
+                    hTop.classList.add("rotate-45", "translate-y-[2px]");
+                    hBot.classList.add("-rotate-45", "-translate-y-[2px]");
+                    hMid.classList.add("opacity-0", "scale-x-0");
                 }
             }
-        };
+
+            menuToggle.addEventListener("click", (e) => {
+                e.stopPropagation();
+                toggleMenu();
+            });
+
+            // Auto-close menu when tapping an item or tapping outside the navigation bar area
+            navLinks.forEach((link) => {
+                link.addEventListener("click", () => {
+                    if (dropdown.classList.contains("scale-y-100")) toggleMenu();
+                });
+            });
+
+            document.addEventListener("click", (e) => {
+                if (!dropdown.contains(e.target) && !menuToggle.contains(e.target)) {
+                    if (dropdown.classList.contains("scale-y-100")) toggleMenu();
+                }
+            });
+        });
     </script>
 
     <!-- DPText Shimmer Effect -->
@@ -74,30 +153,42 @@
             theme: {
                 extend: {
                     animation: {
-                        'shimmer-sweep': 'multiShimmerSweep 0.85s cubic-bezier(0.19, 1, 0.22, 1) forwards',
+                        "shimmer-sweep":
+                            "multiShimmerSweep 0.85s cubic-bezier(0.19, 1, 0.22, 1) forwards",
                     },
                     keyframes: {
                         multiShimmerSweep: {
-                            '0%': { left: '-150%' },
-                            '100%': { left: '150%' },
+                            "0%": { left: "-150%" },
+                            "100%": { left: "150%" },
                         },
                     },
                 },
             },
-        }
+        };
     </script>
 
     <!-- Text 'Enthusiast' Smooth Slide -->
     <script>
-        window.addEventListener('load', () => {
-            const phrases = ["Cloud Computing", "Cybersecurity", "Artificial Intelligence (AI)", "Software Development", "DevOps"];
+        window.addEventListener("load", () => {
+            const phrases = [
+                "Cloud Computing",
+                "Cybersecurity",
+                "Artificial Intelligence (AI)",
+                "Software Development",
+                "DevOps",
+            ];
             let currentIndex = 0;
 
             const textElement = document.getElementById("sliding-text");
+            if (!textElement) return;
             const container = textElement.parentElement;
 
-            // Set initial width so the first transition isn't a "snap"
-            container.style.width = textElement.offsetWidth + "px";
+            // Responsive setup step
+            if (window.innerWidth > 768) {
+                container.style.width = textElement.offsetWidth + "px";
+            } else {
+                container.style.width = "auto";
+            }
 
             function updateText() {
                 // 1. Exit Animation (Slide Up)
@@ -111,12 +202,17 @@
 
                     // 3. Smoothly animate the container width for "Enthusiast"
                     // We use offsetWidth to get the exact pixel width of the new string
-                    container.style.width = textElement.offsetWidth + "px";
+                    // Re-evaluate widths responsively to eliminate string jump behaviors on phone dimensions
+                    if (window.innerWidth > 768) {
+                        container.style.width = textElement.offsetWidth + "px";
+                    } else {
+                        container.style.width = "auto";
+                    }
 
                     // 4. Enter Animation (Slide Up from bottom)
                     textElement.classList.remove("slide-up-exit");
                     textElement.classList.add("slide-up-enter");
-                }, 600); // Wait for exit animation (0.6s) to complete
+                }, 600);
             }
 
             // Interval to cycle phrases every 3.25 seconds
@@ -129,7 +225,7 @@
         class TextScrambler {
             constructor(el) {
                 this.el = el;
-                this.chars = '!<>-_\\/[]{}—=+*^?#________';
+                this.chars = "!<>-_\\/[]{}—=+*^?#________";
                 this.update = this.update.bind(this);
             }
             setText(newText) {
@@ -138,8 +234,8 @@
                 const promise = new Promise((resolve) => (this.resolve = resolve));
                 this.queue = [];
                 for (let i = 0; i < length; i++) {
-                    const from = oldText[i] || '';
-                    const to = newText[i] || '';
+                    const from = oldText[i] || "";
+                    const to = newText[i] || "";
                     const start = Math.floor(Math.random() * 40);
                     const end = start + Math.floor(Math.random() * 40);
                     this.queue.push({ from, to, start, end });
@@ -150,7 +246,7 @@
                 return promise;
             }
             update() {
-                let output = '';
+                let output = "";
                 let complete = 0;
 
                 // Your custom color palette
@@ -159,9 +255,9 @@
                     // '#d96c00', // Orange
                     // '#ff00fe', // Pink
                     // '#00ffff', // Cyan
-                    '#0b0bd9', // Blue
-                    '#492b8c', // Deep Purple
-                    '#610533'  // Wine
+                    "#0b0bd9", // Blue
+                    "#492b8c", // Deep Purple
+                    "#610533", // Wine
                 ];
 
                 for (let i = 0, n = this.queue.length; i < n; i++) {
@@ -172,12 +268,14 @@
                         output += to;
                     } else if (this.frame >= start) {
                         if (!char || Math.random() < 0.28) {
-                            char = this.chars[Math.floor(Math.random() * this.chars.length)];
+                            char =
+                                this.chars[Math.floor(Math.random() * this.chars.length)];
                             this.queue[i].char = char;
                         }
 
                         // Randomly select a color from your list for this specific character
-                        const randomColor = glitchColors[Math.floor(Math.random() * glitchColors.length)];
+                        const randomColor =
+                            glitchColors[Math.floor(Math.random() * glitchColors.length)];
                         output += `<span style="color: ${randomColor}">${char}</span>`;
                     } else {
                         output += from;
@@ -196,7 +294,7 @@
         }
 
         // Initialization
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener("DOMContentLoaded", () => {
             const phrases = [
                 "Building the Future with Code",
                 "Engineering Clean, Maintainable Solutions",
@@ -206,10 +304,10 @@
                 "I Build, Break, and Improve Systems",
                 "Curious. Analytical. Persistent.",
                 "Continuous Delivery Thinking",
-                "Adapt, Improve, Repeat"
+                "Adapt, Improve, Repeat",
             ];
 
-            const el = document.getElementById('scramble-text');
+            const el = document.getElementById("scramble-text");
             const scrambler = new TextScrambler(el);
             let counter = 0;
 
@@ -221,44 +319,6 @@
             };
 
             next();
-        });
-    </script>
-
-    <!-- Typewriter Animation -->
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const typewriterElement = document.getElementById('typewriter-text');
-            // Your exact bio from the source code
-            const fullText = "A recent Bachelor of Computer and Information Sciences graduate with a strong foundation in software development and broad technical interests across cybersecurity, cloud computing, artificial intelligence, and many more. I have hands-on experience developing full-stack, production-ready applications using .NET, C#, HTML, Java, JavaScript, SQL, and React, gained through academic projects and Agile team environments. I am a highly motivated learner with a strong commitment to skill development, industry certifications, and continuous professional growth. If you’re looking for a driven, adaptable, and enthusiastic individual with a passion for technology and continuous learning, I’d love to connect and explore how I can contribute to your team!";
-
-            let charIndex = 0;
-            let isAnimating = false;
-
-            function typeWriter() {
-                if (charIndex < fullText.length) {
-                    typewriterElement.innerHTML += fullText.charAt(charIndex);
-                    charIndex++;
-                    // Adjustable typing speed (in milliseconds)
-                    setTimeout(typeWriter, 10);
-                } else {
-                    // Remove cursor after completion
-                    typewriterElement.classList.remove('after:content-[\'|\']', 'after:animate-pulse');
-                }
-            }
-
-            // Intersection Observer to trigger on scroll
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting && !isAnimating) {
-                        isAnimating = true;
-                        typeWriter();
-                        // Stop observing once animation starts
-                        observer.unobserve(entry.target);
-                    }
-                });
-            }, { threshold: 0.5 }); // Starts when 50% of the box is visible
-
-            observer.observe(typewriterElement);
         });
     </script>
 
@@ -296,20 +356,22 @@
             hasAnimated = true;
 
             // Years Coding (Calculated locally)
-            const startDate = new Date('2023-01-01');
-            const years = Math.floor((new Date() - startDate) / (1000 * 60 * 60 * 24 * 365.25));
+            const startDate = new Date("2023-01-01");
+            const years = Math.floor(
+                (new Date() - startDate) / (1000 * 60 * 60 * 24 * 365.25),
+            );
 
             // Start all four numeric counters simultaneously
-            animateValue('stat-years', 0, years, 2000, "+");
-            animateValue('stat-projects', 0, githubData.projectCount, 2000);
-            animateValue('stat-commits', 0, githubData.commitCount, 2000);
-            animateValue('stat-languages', 0, githubData.languageCount, 2000, "+");
+            animateValue("stat-years", 0, years, 2000, "+");
+            animateValue("stat-projects", 0, githubData.projectCount, 2000);
+            animateValue("stat-commits", 0, githubData.commitCount, 2000);
+            animateValue("stat-languages", 0, githubData.languageCount, 2000, "+");
         }
 
         async function fetchGitHubData() {
             try {
-                const response = await fetch('/.netlify/functions/getGithubData');
-                if (!response.ok) throw new Error('API Error');
+                const response = await fetch("/.netlify/functions/getGithubData");
+                if (!response.ok) throw new Error("API Error");
                 githubData = await response.json();
 
                 // Populate grid immediately
@@ -318,7 +380,7 @@
                 // If the user is ALREADY looking at the stats when data arrives, start!
                 checkVisibilityAndStart();
             } catch (err) {
-                console.error('Fetch Error:', err);
+                console.error("Fetch Error:", err);
 
                 // Set error states to stop counting behaviors
                 fetchFailed = true;
@@ -326,8 +388,13 @@
 
                 // --- THE FALLBACK IMPLEMENTATION ---
                 // Directly target and overwrite the values with "X"
-                const statIds = ['stat-years', 'stat-projects', 'stat-commits', 'stat-languages'];
-                statIds.forEach(id => {
+                const statIds = [
+                    "stat-years",
+                    "stat-projects",
+                    "stat-commits",
+                    "stat-languages",
+                ];
+                statIds.forEach((id) => {
                     const element = document.getElementById(id);
                     if (element) {
                         element.innerHTML = "N/A";
@@ -335,25 +402,27 @@
                 });
 
                 // Fallback grid message or container reset
-                const container = document.getElementById('projects-grid');
+                const container = document.getElementById("projects-grid");
                 if (container) {
-                    container.innerHTML = '<p class="text-gray-400 text-sm col-span-full text-center py-8">Projects temporarily unavailable.</p>';
+                    container.innerHTML =
+                        '<p class="text-gray-400 text-sm col-span-full text-center py-8">Projects temporarily unavailable.</p>';
                 }
             }
         }
 
         function renderProjectGrid(projects) {
-            const container = document.getElementById('projects-grid');
+            const container = document.getElementById("projects-grid");
             if (!container || !projects) return;
-            container.innerHTML = '';
-            projects.forEach(repo => {
-                const card = document.createElement('div');
-                card.className = "p-6 bg-white/5 border border-white/10 rounded-xl hover:border-primary/50 transition-all duration-300 group";
+            container.innerHTML = "";
+            projects.forEach((repo) => {
+                const card = document.createElement("div");
+                card.className =
+                    "p-6 bg-white/5 border border-white/10 rounded-xl hover:border-primary/50 transition-all duration-300 group";
                 card.innerHTML = `
             <h3 class="text-white font-bold text-lg mb-2 group-hover:text-primary transition-colors">${repo.name}</h3>
-            <p class="text-gray-400 text-sm mb-6 line-clamp-2">${repo.description || 'Project details.'}</p>
+            <p class="text-gray-400 text-sm mb-6 line-clamp-2">${repo.description || "Project details."}</p>
             <div class="flex items-center justify-between mt-auto">
-                <span class="text-xs text-slate-500 uppercase tracking-widest">${repo.language || 'Code'}</span>
+                <span class="text-xs text-slate-500 uppercase tracking-widest">${repo.language || "Code"}</span>
                 <a href="${repo.html_url}" target="_blank" class="text-primary text-sm font-semibold flex items-center gap-1 hover:gap-2 transition-all">
                     View Source <span class="material-symbols-outlined text-xs">arrow_forward</span>
                 </a>
@@ -364,40 +433,100 @@
 
         // 4. Scroll Detection (Intersection Observer)
         function checkVisibilityAndStart() {
-            const statsSection = document.querySelector('.stats-container') || document.getElementById('stat-years')?.parentElement;
+            const statsSection =
+                document.querySelector(".stats-container") ||
+                document.getElementById("stat-years")?.parentElement;
 
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        startAllAnimations();
-                    }
-                });
-            }, { threshold: 0.2 });
+            const observer = new IntersectionObserver(
+                (entries) => {
+                    entries.forEach((entry) => {
+                        if (entry.isIntersecting) {
+                            startAllAnimations();
+                        }
+                    });
+                },
+                { threshold: 0.2 },
+            );
 
             if (statsSection) observer.observe(statsSection);
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener("DOMContentLoaded", () => {
             fetchGitHubData();
             checkVisibilityAndStart();
         });
     </script>
 
-    <!-- Technical Skills -->
+    <!-- Typewriter Animation -->
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            const cards = document.querySelectorAll('.dynamic-flashlight');
+            const typewriterElement = document.getElementById("typewriter-text");
+            if (!typewriterElement) return;
 
-            cards.forEach(card => {
-                card.addEventListener('mousemove', (e) => {
+            // Your exact bio from the source code
+            const fullText =
+                "A recent Bachelor of Computer and Information Sciences graduate with a strong foundation in software development and broad technical interests across cybersecurity, cloud computing, artificial intelligence, and many more. I have hands-on experience developing full-stack, production-ready applications using .NET, C#, HTML, Java, JavaScript, SQL, and React, gained through academic projects and Agile team environments. I am a highly motivated learner with a strong commitment to skill development, industry certifications, and continuous professional growth. If you’re looking for a driven, adaptable, and enthusiastic individual with a passion for technology and continuous learning, I’d love to connect and explore how I can contribute to your team!";
+
+            let charIndex = 0;
+            let isAnimating = false;
+
+            function typeWriter() {
+                if (charIndex < fullText.length) {
+                    typewriterElement.innerHTML += fullText.charAt(charIndex);
+                    charIndex++;
+                    // Adjustable typing speed (in milliseconds)
+                    setTimeout(typeWriter, 20);
+                } else {
+                    // Safely toggle off the blinking pseudo-cursor after completion via clean data attribute
+                    typewriterElement.setAttribute("data-cursor", "done");
+                }
+            }
+
+            // Intersection Observer to trigger on scroll
+            const observer = new IntersectionObserver(
+                (entries) => {
+                    entries.forEach((entry) => {
+                        // Lowered threshold to 0.15 to ensure reliable activation across all mobile dimensions
+                        if (entry.isIntersecting && !isAnimating) {
+                            isAnimating = true;
+                            typeWriter();
+                            // Stop observing once animation starts
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                },
+                { threshold: 0.15 },
+            );
+
+            observer.observe(typewriterElement);
+        });
+    </script>
+
+    <!-- Technical Skills (Flashlight) Animation -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const cards = document.querySelectorAll(".dynamic-flashlight");
+
+            cards.forEach((card) => {
+                // FIXED: Transformed mousemove into pointermove to capture hardware events responsively
+                card.addEventListener("pointermove", (e) => {
+                    // Safe guard: Bypass calculation on mobile screens to optimize scroll performance
+                    if (e.pointerType !== "mouse") return;
+
                     const rect = card.getBoundingClientRect();
                     // Calculate cursor positions isolated contextually within the active card component boundary
                     const x = e.clientX - rect.left;
                     const y = e.clientY - rect.top;
 
                     // Pipe updated runtime states back directly to local element scope references
-                    card.style.setProperty('--mouse-x', `${x}px`);
-                    card.style.setProperty('--mouse-y', `${y}px`);
+                    card.style.setProperty("--mouse-x", `${x}px`);
+                    card.style.setProperty("--mouse-y", `${y}px`);
+                });
+
+                // Clean-up step: Resets glow positioning when the pointer exits the card frame
+                card.addEventListener("pointerleave", () => {
+                    card.style.setProperty("--mouse-x", `-999px`);
+                    card.style.setProperty("--mouse-y", `-999px`);
                 });
             });
         });
@@ -406,37 +535,37 @@
     <!-- Featured Projects -->
     <script>
         /* Handles: API Fetch, Filter/Sort State, Pagination, View Toggling */
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener("DOMContentLoaded", () => {
             // --- Configuration & State ---
             let allProjects = [];
             let filteredProjects = [];
             let currentPage = 1;
-            let viewMode = 'card'; // 'card' or 'list'
+            let viewMode = "card"; // 'card' or 'list'
 
             const CONFIG = {
                 cardPageSize: 6,
                 listPageSize: 10,
-                shimmerCount: 6
+                shimmerCount: 6,
             };
 
             // --- Selectors ---
             const elements = {
-                search: document.getElementById('project-search'),
-                langFilter: document.getElementById('lang-filter'),
-                sortSelect: document.getElementById('sort-select'),
-                forkToggle: document.getElementById('fork-toggle'),
+                search: document.getElementById("project-search"),
+                langFilter: document.getElementById("lang-filter"),
+                sortSelect: document.getElementById("sort-select"),
+                forkToggle: document.getElementById("fork-toggle"),
                 // Matches the pill-style slider container
-                viewTogglePill: document.getElementById('view-toggle-pill'),
-                container: document.getElementById('projects-display-area'),
-                pagination: document.getElementById('pagination-controls'),
-                forkCountBadge: document.getElementById('fork-count')
+                viewTogglePill: document.getElementById("view-toggle-pill"),
+                container: document.getElementById("projects-display-area"),
+                pagination: document.getElementById("pagination-controls"),
+                forkCountBadge: document.getElementById("fork-count"),
             };
 
             // --- 1. Fetch Data ---
             async function initProjects() {
                 showShimmer();
                 try {
-                    const response = await fetch('/.netlify/functions/getGithubData');
+                    const response = await fetch("/.netlify/functions/getGithubData");
                     const data = await response.json();
                     allProjects = data.projects || [];
 
@@ -451,21 +580,22 @@
                     console.error("Failed to load projects:", err);
 
                     // Centered, interactive glass error card view
+                    elements.container.className = "grid grid-cols-1 w-full";
                     elements.container.innerHTML = `
-            <div class="col-span-full flex flex-col items-center justify-center text-center py-12 px-4 max-w-md mx-auto">
-                <div class="w-12 h-12 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-400 mb-4 animate-pulse">
-                    <span class="material-symbols-outlined text-2xl">error</span>
-                </div>
-                <h4 class="text-white font-semibold text-base mb-1">Failed to Load Projects</h4>
-                <p class="text-sm text-slate-400 mb-5">
-                    There was an issue communicating with the GitHub API sync pipeline.
-                </p>
-                <button onclick="location.reload()" class="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-wider text-white bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 active:scale-95 transition-all duration-150 cursor-pointer">
-                    <span class="material-symbols-outlined text-sm">refresh</span>
-                    Try Again
-                </button>
-            </div>
-        `;
+                            <div class="col-span-full flex flex-col items-center justify-center text-center py-12 px-4 max-w-md mx-auto">
+                                <div class="w-12 h-12 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-400 mb-4 animate-pulse">
+                                    <span class="material-symbols-outlined text-2xl">error</span>
+                                </div>
+                                <h4 class="text-white font-semibold text-base mb-1">Failed to Load Projects</h4>
+                                <p class="text-sm text-slate-400 mb-5">
+                                    There was an issue communicating with the GitHub API sync pipeline.
+                                </p>
+                                <button onclick="location.reload()" class="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-wider text-white bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 active:scale-95 transition-all duration-150 cursor-pointer">
+                                    <span class="material-symbols-outlined text-sm">refresh</span>
+                                    Try Again
+                                </button>
+                            </div>
+                        `;
                 }
             }
 
@@ -476,10 +606,14 @@
                 const showForks = elements.forkToggle.checked;
                 const sortBy = elements.sortSelect.value;
 
-                filteredProjects = allProjects.filter(project => {
-                    const matchesSearch = project.name.toLowerCase().includes(searchTerm) ||
-                        (project.description && project.description.toLowerCase().includes(searchTerm));
-                    const matchesLang = selectedLang === 'all' || project.all_languages.includes(selectedLang);
+                filteredProjects = allProjects.filter((project) => {
+                    const matchesSearch =
+                        project.name.toLowerCase().includes(searchTerm) ||
+                        (project.description &&
+                            project.description.toLowerCase().includes(searchTerm));
+                    const matchesLang =
+                        selectedLang === "all" ||
+                        (project.all_languages && project.all_languages.includes(selectedLang));
                     const matchesFork = showForks ? true : !project.isFork;
 
                     return matchesSearch && matchesLang && matchesFork;
@@ -487,9 +621,11 @@
 
                 // Sorting
                 filteredProjects.sort((a, b) => {
-                    if (sortBy === 'recent') return new Date(b.updated_at) - new Date(a.updated_at);
-                    if (sortBy === 'az') return a.name.localeCompare(b.name);
-                    if (sortBy === 'commits') return (b.commit_count || 0) - (a.commit_count || 0);
+                    if (sortBy === "recent")
+                        return new Date(b.updated_at) - new Date(a.updated_at);
+                    if (sortBy === "az") return a.name.localeCompare(b.name);
+                    if (sortBy === "commits")
+                        return (b.commit_count || 0) - (a.commit_count || 0);
                     return 0;
                 });
 
@@ -503,26 +639,30 @@
                 if (filteredProjects.length === 0) {
                     elements.container.className = "grid grid-cols-1 w-full";
                     elements.container.innerHTML = `
-                        <div class="col-span-full flex flex-col items-center justify-center text-center py-16 px-4 max-w-md mx-auto">
-                            <div class="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 mb-4">
-                                <span class="material-symbols-outlined text-2xl">search_off</span>
+                            <div class="col-span-full flex flex-col items-center justify-center text-center py-16 px-4 max-w-md mx-auto">
+                                <div class="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 mb-4">
+                                    <span class="material-symbols-outlined text-2xl">search_off</span>
+                                </div>
+                                <h4 class="text-white font-semibold text-base mb-1">No Projects Found</h4>
+                                <p class="text-sm text-slate-400">
+                                    We couldn't find any repositories matching your exact search criteria or filters options. Try adjusting your keywords!
+                                </p>
                             </div>
-                            <h4 class="text-white font-semibold text-base mb-1">No Projects Found</h4>
-                            <p class="text-sm text-slate-400">
-                                We couldn't find any repositories matching your exact search criteria or filters options. Try adjusting your keywords!
-                            </p>
-                        </div>
-                    `;
+                        `;
                     renderPagination(0); // Wipe out pagination handles clean
                     return;
                 }
 
-                const pageSize = viewMode === 'card' ? CONFIG.cardPageSize : CONFIG.listPageSize;
+                const pageSize =
+                    viewMode === "card" ? CONFIG.cardPageSize : CONFIG.listPageSize;
                 const startIndex = (currentPage - 1) * pageSize;
-                const paginatedItems = filteredProjects.slice(startIndex, startIndex + pageSize);
+                const paginatedItems = filteredProjects.slice(
+                    startIndex,
+                    startIndex + pageSize,
+                );
 
-                if (viewMode === 'card') {
-                    renderCardView(paginatedItems);
+                if (viewMode === "card") {
+                    renderCardView(paginatedItems, pageSize);
                 } else {
                     renderListView(paginatedItems);
                 }
@@ -530,180 +670,216 @@
                 renderPagination(Math.ceil(filteredProjects.length / pageSize));
             }
 
-            function renderCardView(projects) {
-                elements.container.className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6";
-                elements.container.innerHTML = projects.map((project, index) => `
-    <div class="glass-panel p-6 rounded-xl hover:translate-y-[-5px] transition-all duration-300 border border-white/10 hover-glow-primary group relative overflow-hidden animate-slide"
-         style="animation-delay: ${index * 0.1}s">
-        <div class="flex flex-col h-full">
-            <h3 class="mb-2">
-                <a href="${project.html_url}" target="_blank" 
-                   class="text-white font-bold text-xl hover:underline decoration-white decoration-2 underline-offset-4 transition-all">
-                    ${project.name}
-                </a>
-            </h3>
-            <p class="text-slate-400 text-sm mb-4 flex-grow ${!project.description ? 'italic' : 'not-italic'}">
-                ${project.description || 'No description provided.'}
-            </p>
-<div class="flex flex-wrap gap-2 mb-6">
-    ${project.all_languages.map(lang => `
-        <span class="px-2 py-1 text-[10px] bg-primary/50 text-white rounded-md border border-primary uppercase font-medium tracking-wider">
-            ${lang}
-        </span>`).join('')}
-</div>
-            <div class="grid grid-cols-2 gap-y-3 pt-4 border-t border-white/10 text-xs text-slate-500">
-                <div class="flex items-center gap-2"><span class="material-symbols-outlined text-sm">history</span> ${project.commit_count || 0} Commits</div>
-                <div class="flex items-center gap-2"><span class="material-symbols-outlined text-sm">star</span> ${project.stars || 0} Stars</div>
-                <div class="flex items-center gap-2"><span class="material-symbols-outlined text-sm">fork_right</span> ${project.forks || 0} Forks</div>
-                <div class="flex items-center gap-2"><span class="material-symbols-outlined text-sm">update</span> ${new Date(project.updated_at).toLocaleDateString()}</div>
-            </div>
-        </div>
-    </div>
-`).join('');
+            function renderCardView(projects, pageSize) {
+                elements.container.className =
+                    "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6";
+                elements.container.innerHTML = projects
+                    .map(
+                        (project, index) => `
+                <div class="glass-panel p-6 rounded-xl hover:translate-y-[-5px] transition-all duration-300 border border-white/10 hover-glow-primary group relative overflow-hidden animate-slide"
+                     style="animation-delay: ${(index % pageSize) * 0.08}s">
+                    <div class="flex flex-col h-full">
+                        <h3 class="mb-2">
+                            <a href="${project.html_url}" target="_blank" 
+                               class="text-white font-bold text-xl hover:underline decoration-white decoration-2 underline-offset-4 transition-all line-clamp-1 break-all">
+                                ${project.name}
+                            </a>
+                        </h3>
+                        <p class="text-slate-400 text-sm mb-4 flex-grow line-clamp-3 ${!project.description ? "italic" : "not-italic"}">
+                            ${project.description || "No description provided."}
+                        </p>
+                        <div class="flex flex-wrap gap-2 mb-6 min-h-[26px]">
+                            ${(project.all_languages || [])
+                                .map(
+                                    (lang) => `
+                                <span class="px-2 py-1 text-[10px] bg-primary/50 text-white rounded-md border border-primary uppercase font-medium tracking-wider whitespace-nowrap">
+                                    ${lang}
+                                </span>`,
+                                )
+                                .join("")}
+                        </div>
+                        <div class="grid grid-cols-2 gap-y-3 pt-4 border-t border-white/10 text-xs text-slate-500">
+                            <div class="flex items-center gap-2"><span class="material-symbols-outlined text-sm">history</span> ${project.commit_count || 0} Commits</div>
+                            <div class="flex items-center gap-2"><span class="material-symbols-outlined text-sm">star</span> ${project.stars || 0} Stars</div>
+                            <div class="flex items-center gap-2"><span class="material-symbols-outlined text-sm">fork_right</span> ${project.forks || 0} Forks</div>
+                            <div class="flex items-center gap-2"><span class="material-symbols-outlined text-sm">update</span> ${new Date(project.updated_at).toLocaleDateString()}</div>
+                        </div>
+                    </div>
+                </div>
+            `,
+                    )
+                    .join("");
             }
 
             function renderListView(projects) {
-                elements.container.className = "overflow-x-auto w-full glass-panel rounded-xl border border-primary/5";
+                // FIXED: Wrapped block element in horizontal overflow containers to capture dynamic wide table objects safely
+                elements.container.className =
+                    "w-full glass-panel rounded-xl border border-primary/5 overflow-hidden";
                 elements.container.innerHTML = `
-    <table class="w-full text-left border-collapse">
-        <thead class="bg-white/5 text-slate-300 text-sm uppercase">
-            <tr>
-                <th class="p-4">Project</th>
-                <th class="p-4">Languages</th>
-                <th class="p-4">Stats</th>
-                <th class="p-4 text-right">Updated</th>
-            </tr>
-        </thead>
-        <tbody class="text-slate-400">
-            ${projects.map((p, index) => `
-                <tr class="border-t border-white/5 hover:bg-white/[0.02] transition-colors animate-slide"
-                    style="animation-delay: ${index * 0.06}s">
-                    <td class="p-4">
-                        <div class="font-bold">
-                            <a href="${p.html_url}" target="_blank" 
-                               class="text-white hover:underline decoration-white decoration-2 underline-offset-2 transition-all">
-                                ${p.name}
-                            </a>
-                        </div>
-                        <div class="text-xs text-slate-500 mt-1 ${!p.description ? 'italic' : 'not-italic'}">
-                            ${p.description || 'No description provided.'}
-                        </div>
-                    </td>
-                    <td class="p-4">
-<div class="flex flex-wrap gap-1">
-    ${p.all_languages.slice(0, 3).map(l => `
-        <span class="px-1.5 py-0.5 text-[9px] bg-primary/50 text-white rounded border border-primary uppercase font-medium">
-            ${l}
-        </span>`).join('')}
-</div>
-                    </td>
-                    <td class="p-4 text-xs">
-                        ${p.commit_count || 0}C | ${p.stars || 0}S | ${p.forks || 0}F
-                    </td>
-                    <td class="p-4 text-right text-xs">${new Date(p.updated_at).toLocaleDateString()}</td>
-                </tr>
-            `).join('')}
-        </tbody>
-    </table>
-`;
+                <div class="overflow-x-auto block w-full custom-scrollbar">
+                    <table class="w-full text-left border-collapse min-w-[600px]">
+                        <thead class="bg-white/5 text-slate-300 text-sm uppercase">
+                            <tr>
+                                <th class="p-4 whitespace-nowrap">Project</th>
+                                <th class="p-4 whitespace-nowrap">Languages</th>
+                                <th class="p-4 whitespace-nowrap">Stats</th>
+                                <th class="p-4 text-right whitespace-nowrap">Updated</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-slate-400">
+                            ${projects
+                        .map(
+                            (p, index) => `
+                                <tr class="border-t border-white/5 hover:bg-white/[0.02] transition-colors animate-slide"
+                                    style="animation-delay: ${index * 0.05}s">
+                                    <td class="p-4 max-w-[300px]">
+                                        <div class="font-bold truncate">
+                                            <a href="${p.html_url}" target="_blank" 
+                                               class="text-white hover:underline decoration-white decoration-2 underline-offset-2 transition-all break-all">
+                                                ${p.name}
+                                            </a>
+                                        </div>
+                                        <div class="text-xs text-slate-500 mt-1 line-clamp-1 ${!p.description ? "italic" : "not-italic"}">
+                                            ${p.description || "No description provided."}
+                                        </div>
+                                    </td>
+                                    <td class="p-4">
+                                        <div class="flex flex-wrap gap-1">
+                                            ${(p.all_languages || [])
+                                    .slice(0, 3)
+                                    .map(
+                                        (l) => `
+                                                <span class="px-1.5 py-0.5 text-[9px] bg-primary/50 text-white rounded border border-primary uppercase font-medium whitespace-nowrap">
+                                                    ${l}
+                                                </span>`,
+                                    )
+                                    .join("")}
+                                        </div>
+                                    </td>
+                                    <td class="p-4 text-xs whitespace-nowrap">
+                                        ${p.commit_count || 0}C | ${p.stars || 0}S | ${p.forks || 0}F
+                                    </td>
+                                    <td class="p-4 text-right text-xs whitespace-nowrap">${new Date(p.updated_at).toLocaleDateString()}</td>
+                                </tr>
+                            `,
+                        )
+                        .join("")}
+                        </tbody>
+                    </table>
+                </div>
+            `;
             }
 
             // --- 4. Pagination & Helpers ---
             function renderPagination(totalPages) {
                 if (totalPages <= 1) {
-                    elements.pagination.innerHTML = '';
+                    elements.pagination.innerHTML = "";
                     return;
                 }
 
-                let dots = '';
+                let dots = "";
                 for (let i = 1; i <= totalPages; i++) {
                     const isActive = i === currentPage;
                     dots += `
-                    <button onclick="changePage(${i})" class="w-8 h-8 rounded-full transition-all duration-300 flex items-center justify-center 
-                    ${isActive ? 'bg-primary text-slate-300 scale-110 font-bold shadow-[0_0_15px_rgba(11,11,217,0.4)]' : 'bg-white/5 text-slate-300 hover:bg-white/10'}">
-                        ${i}
-                    </button>
-                `;
+                        <button onclick="changePage(${i})" class="w-8 h-8 rounded-full transition-all duration-300 flex items-center justify-center 
+                        ${isActive ? "bg-primary text-slate-300 scale-110 font-bold shadow-[0_0_15px_rgba(11,11,217,0.4)]" : "bg-white/5 text-slate-300 hover:bg-white/10"}">
+                            ${i}
+                        </button>
+                    `;
                 }
 
                 elements.pagination.innerHTML = `
-                <div class="flex items-center gap-4 mt-10 justify-center">
-                    <button onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''} class="p-2 rounded-full hover:bg-white/10 text-white disabled:opacity-30 transition-all">
-                        <span class="material-symbols-outlined">chevron_left</span>
-                    </button>
-                    <div class="flex gap-2">${dots}</div>
-                    <button onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''} class="p-2 rounded-full hover:bg-white/10 text-white disabled:opacity-30 transition-all">
-                        <span class="material-symbols-outlined">chevron_right</span>
-                    </button>
-                </div>
-            `;
+                    <div class="flex items-center gap-4 mt-8 sm:mt-10 justify-center">
+                        <button onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? "disabled" : ""} class="p-2 rounded-full hover:bg-white/10 text-white disabled:opacity-30 transition-all cursor-pointer disabled:cursor-not-allowed">
+                            <span class="material-symbols-outlined block">chevron_left</span>
+                        </button>
+                        <div class="flex gap-2">${dots}</div>
+                        <button onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? "disabled" : ""} class="p-2 rounded-full hover:bg-white/10 text-white disabled:opacity-30 transition-all cursor-pointer disabled:cursor-not-allowed">
+                            <span class="material-symbols-outlined block">chevron_right</span>
+                        </button>
+                    </div>
+                `;
             }
 
             window.changePage = (page) => {
                 currentPage = page;
                 render();
-                elements.container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                elements.container.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start",
+                });
             };
 
             function showShimmer() {
-                elements.container.className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6";
-                elements.container.innerHTML = Array(CONFIG.shimmerCount).fill(0).map(() => `
-                <div class="glass-panel p-6 rounded-xl h-[300px] animate-pulse bg-white/5 border border-white/5">
-                    <div class="h-6 w-3/4 bg-white/10 rounded mb-4"></div>
-                    <div class="h-4 w-full bg-white/10 rounded mb-2"></div>
-                    <div class="h-4 w-5/6 bg-white/10 rounded mb-6"></div>
-                    <div class="flex gap-2 mt-auto">
-                        <div class="h-5 w-12 bg-white/10 rounded"></div>
-                        <div class="h-5 w-12 bg-white/10 rounded"></div>
+                elements.container.className =
+                    "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6";
+                elements.container.innerHTML = Array(CONFIG.shimmerCount)
+                    .fill(0)
+                    .map(
+                        () => `
+                    <div class="glass-panel p-6 rounded-xl h-[300px] animate-pulse bg-white/5 border border-white/5 flex flex-col justify-between">
+                        <div>
+                            <div class="h-6 w-3/4 bg-white/10 rounded mb-4"></div>
+                            <div class="h-4 w-full bg-white/10 rounded mb-2"></div>
+                            <div class="h-4 w-5/6 bg-white/10 rounded mb-6"></div>
+                        </div>
+                        <div class="flex gap-2 mt-auto">
+                            <div class="h-5 w-12 bg-white/10 rounded"></div>
+                            <div class="h-5 w-12 bg-white/10 rounded"></div>
+                        </div>
                     </div>
-                </div>
-            `).join('');
+                `,
+                    )
+                    .join("");
             }
 
             function populateLanguages(langs) {
-                elements.langFilter.innerHTML = '<option value="all">All Languages</option>' +
-                    langs.map(l => `<option value="${l}">${l}</option>`).join('');
+                if (!elements.langFilter) return;
+                elements.langFilter.innerHTML =
+                    '<option value="all" class="text-center">All Languages</option>' +
+                    (langs || []).map((l) => `<option value="${l}" class="text-center">${l}</option>`).join("");
             }
 
             function updateForkBadge() {
-                const forkCount = allProjects.filter(p => p.isFork).length;
+                const forkCount = allProjects.filter((p) => p.isFork).length;
                 if (elements.forkCountBadge) {
                     elements.forkCountBadge.textContent = forkCount;
                 }
             }
 
             // --- 5. Event Listeners ---
-            elements.search.addEventListener('input', applyFilters);
-            elements.langFilter.addEventListener('change', applyFilters);
-            elements.sortSelect.addEventListener('change', applyFilters);
-            elements.forkToggle.addEventListener('change', applyFilters);
+            elements.search.addEventListener("input", applyFilters);
+            elements.langFilter.addEventListener("change", applyFilters);
+            elements.sortSelect.addEventListener("change", applyFilters);
+            elements.forkToggle.addEventListener("change", applyFilters);
 
             // Slider logic for Card-to-List transition
             if (elements.viewTogglePill) {
-                elements.viewTogglePill.addEventListener('click', () => {
+                elements.viewTogglePill.addEventListener("click", () => {
                     // Smooth fade-out before switching content
-                    elements.container.style.opacity = '0';
-                    elements.container.style.transform = 'translateY(10px)';
+                    elements.container.style.opacity = "0";
+                    elements.container.style.transform = "translateY(10px)";
 
                     setTimeout(() => {
                         // Toggle state
-                        viewMode = (viewMode === 'card') ? 'list' : 'card';
+                        viewMode = viewMode === "card" ? "list" : "card";
 
                         // Update UI Slider Position
-                        elements.viewTogglePill.classList.toggle('list-active');
+                        elements.viewTogglePill.classList.toggle("list-active");
 
                         // Update Active Icon Highlight
-                        const icons = elements.viewTogglePill.querySelectorAll('.view-icon-btn');
-                        icons.forEach(btn => {
-                            btn.classList.toggle('active', btn.dataset.view === viewMode);
+                        const icons =
+                            elements.viewTogglePill.querySelectorAll(".view-icon-btn");
+                        icons.forEach((btn) => {
+                            btn.classList.toggle("active", btn.dataset.view === viewMode);
                         });
 
                         // Re-render and fade-in
                         currentPage = 1;
                         render();
 
-                        elements.container.style.opacity = '1';
-                        elements.container.style.transform = 'translateY(0)';
+                        elements.container.style.opacity = "1";
+                        elements.container.style.transform = "translateY(0)";
                     }, 300);
                 });
             }
@@ -714,63 +890,94 @@
 
     <!-- Email Contact  -->
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const contactForm = document.getElementById('portfolioContactForm');
+        document.addEventListener("DOMContentLoaded", () => {
+            const contactForm = document.getElementById("portfolioContactForm");
 
             if (contactForm) {
-                const submitButton = document.getElementById('submitBtn');
-                const submitButtonText = document.getElementById('submitBtnText');
+                const submitButton = document.getElementById("submitBtn");
+                const submitButtonText = document.getElementById("submitBtnText");
 
                 // Explicitly separate arrays of classes to manage state toggles without collision
-                const normalClasses = ['group', 'bg-primary', 'hover:shadow-[0_0_50px_0px_rgba(13,13,242,0.8)]'];
-                const errorClasses = ['bg-red-600', 'animate-shake']; // No shimmer group, no glow
-                const successClasses = ['bg-green-600'/*, 'hover:shadow-[0_0_50px_0px_rgba(22,163,74,0.8)]'*/];
+                const normalClasses = ["group", "bg-primary", "hover:shadow-[0_0_50px_0px_rgba(13,13,242,0.8)]"];
+                const errorClasses = ["bg-red-600", "animate-shake", "hover:shadow-[0_0_50px_0px_rgba(220,38,38,0.8)]"]; // No shimmer group, no glow
+                const successClasses = ["bg-green-600", "hover:shadow-[0_0_50px_0px_rgba(22,163,74,0.8)]"];
 
                 let stateTimeout = null;
 
-                contactForm.addEventListener('submit', async (event) => {
+                // Select and group elements cleanly
+                const nameInput = document.getElementById("name");
+                const emailInput = document.getElementById("email");
+                const messageInput = document.getElementById("message");
+                const inputsList = [nameInput, emailInput, messageInput];
+
+                // ADDED: Real-time validation cleaner to wipe errors as soon as the user interacts
+                inputsList.forEach((input) => {
+                    if (input) {
+                        input.addEventListener("input", () => {
+                            input.classList.remove(
+                                "border-red-500",
+                                "focus:border-red-500",
+                                "focus:ring-red-500",
+                                "ring-1",
+                                "ring-red-500"
+                            );
+                        });
+                    }
+                });
+
+                contactForm.addEventListener("submit", async (event) => {
                     event.preventDefault();
 
                     if (stateTimeout) clearTimeout(stateTimeout);
 
-                    const nameInput = document.getElementById('name');
-                    const emailInput = document.getElementById('email');
-                    const messageInput = document.getElementById('message');
-                    const inputsList = [nameInput, emailInput, messageInput];
-
                     // Wipe old border validation layouts
-                    inputsList.forEach(el => el.classList.remove('border-red-500', 'focus:border-red-500'));
+                    inputsList.forEach((el) => {
+                        if (el) {
+                            el.classList.remove(
+                                "border-red-500",
+                                "focus:border-red-500",
+                                "focus:ring-red-500",
+                                "ring-1",
+                                "ring-red-500"
+                            );
+                        }
+                    });
 
-                    const nameVal = nameInput.value.trim();
-                    const emailVal = emailInput.value.trim();
-                    const messageVal = messageInput.value.trim();
+                    const nameVal = nameInput ? nameInput.value.trim() : "";
+                    const emailVal = emailInput ? emailInput.value.trim() : "";
+                    const messageVal = messageInput ? messageInput.value.trim() : "";
 
                     let targetedRedFields = [];
                     let buttonFeedbackText = "";
 
                     // --- VALIDATION TREE PRIORITY CODES ---
                     if (!nameVal || !emailVal || !messageVal) {
-                        if (!nameVal) targetedRedFields.push(nameInput);
-                        if (!emailVal) targetedRedFields.push(emailInput);
-                        if (!messageVal) targetedRedFields.push(messageInput);
+                        if (!nameVal && nameInput) targetedRedFields.push(nameInput);
+                        if (!emailVal && emailInput) targetedRedFields.push(emailInput);
+                        if (!messageVal && messageInput) targetedRedFields.push(messageInput);
                         buttonFeedbackText = "Please fill out the highlighted fields correctly.";
-                    }
-                    else if (!emailVal.includes('@')) {
-                        targetedRedFields.push(emailInput);
+                    } else if (!emailVal.includes("@")) {
+                        if (emailInput) targetedRedFields.push(emailInput);
                         buttonFeedbackText = "Please ensure your email contains an '@' symbol.";
-                    }
-                    else {
+                    } else {
                         const validationPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                         if (!validationPattern.test(emailVal)) {
-                            targetedRedFields.push(emailInput);
+                            if (emailInput) targetedRedFields.push(emailInput);
                             buttonFeedbackText = "Please enter a valid email address (e.g. name@gmail.com).";
                         }
                     }
 
                     // --- ACTIONS FOR ERROR DETECTED ---
                     if (targetedRedFields.length > 0) {
-                        targetedRedFields.forEach(field => {
-                            field.classList.add('border-red-500', 'focus:border-red-500');
+                        targetedRedFields.forEach((field) => {
+                            // Enforced custom ring classes to override standard tailwind primary-focus attributes safely
+                            field.classList.add(
+                                "border-red-500",
+                                "focus:border-red-500",
+                                "focus:ring-red-500",
+                                "ring-1",
+                                "ring-red-500"
+                            );
                         });
 
                         // Decisively drop blue, inject flat red theme styles
@@ -778,10 +985,16 @@
                         submitButton.classList.add(...errorClasses);
                         submitButtonText.innerText = buttonFeedbackText;
 
-                        // Enforce 5-second automatic layout recovery loop
+                        // Enforce 4-second automatic layout recovery loop
                         stateTimeout = setTimeout(() => {
-                            targetedRedFields.forEach(field => {
-                                field.classList.remove('border-red-500', 'focus:border-red-500');
+                            targetedRedFields.forEach((field) => {
+                                field.classList.remove(
+                                    "border-red-500",
+                                    "focus:border-red-500",
+                                    "focus:ring-red-500",
+                                    "ring-1",
+                                    "ring-red-500"
+                                );
                             });
                             submitButton.classList.remove(...errorClasses);
                             submitButton.classList.add(...normalClasses);
@@ -793,28 +1006,34 @@
 
                     // --- VALIDATION PASSED: INITIATE API BACKEND FETCH ---
                     submitButton.disabled = true;
-                    submitButtonText.innerText = 'Sending...';
+                    submitButtonText.innerText = "Sending...";
 
                     const dataPackage = {
                         name: nameVal,
                         email: emailVal,
-                        message: messageVal
+                        message: messageVal,
                     };
 
                     try {
-                        const response = await fetch('/.netlify/functions/sendEmail', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(dataPackage)
+                        const response = await fetch("/.netlify/functions/sendEmail", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(dataPackage),
                         });
 
-                        const parsedResult = await response.json();
+                        // Protect against empty response payloads
+                        let parsedResult = {};
+                        try {
+                            parsedResult = await response.json();
+                        } catch (e) {
+                            parsedResult = { error: "Malformed response stream received" };
+                        }
 
                         if (response.ok) {
                             // Success Confirmation state
                             submitButton.classList.remove(...normalClasses);
                             submitButton.classList.add(...successClasses);
-                            submitButtonText.innerText = 'Thank you! Message Sent Successfully.';
+                            submitButtonText.innerText = "Thank you! Message Sent Successfully.";
                             contactForm.reset();
 
                             setTimeout(() => {
@@ -823,18 +1042,20 @@
                                 submitButtonText.innerText = "Send Message";
                                 submitButton.disabled = false;
                             }, 4000);
-
                         } else {
-                            throw new Error(parsedResult.error || "Function rejected wrapper");
+                            throw new Error(
+                                parsedResult.error || "Function rejected wrapper",
+                            );
                         }
                     } catch (err) {
-                        console.error('Submission mistake:', err);
+                        console.error("Submission mistake:", err);
 
                         // Fallback to error UI layout if function encounters server error
                         submitButton.classList.remove(...normalClasses);
                         submitButton.classList.add(...errorClasses);
                         submitButtonText.innerText = "Server Error. Please try again later.";
 
+                        // FIXED: Button is now properly re-enabled after an error timeout loop passes
                         setTimeout(() => {
                             submitButton.classList.remove(...errorClasses);
                             submitButton.classList.add(...normalClasses);
@@ -877,7 +1098,7 @@
 
         /* Constructing the realistic 30° metallic multi-streak reflection layer */
         .logo-shimmer-container::after {
-            content: '';
+            content: "";
             position: absolute;
             top: 0;
             left: -150%;
@@ -892,11 +1113,11 @@
                     rgba(255, 255, 255, 0.15) 35%,
                     rgba(255, 255, 255, 0.55) 43%,
                     /* Main bright light streak */
-                    rgba(255, 255, 255, 0.30) 48%,
+                    rgba(255, 255, 255, 0.3) 48%,
                     transparent 52%,
                     rgba(255, 255, 255, 0.45) 57%,
                     /* Secondary sharp streak */
-                    rgba(255, 255, 255, 0.10) 64%,
+                    rgba(255, 255, 255, 0.1) 64%,
                     transparent 72%);
 
             pointer-events: none;
@@ -1049,7 +1270,7 @@
 
         /* Flashlight spotlight hover effect styling overlay */
         .dynamic-flashlight::before {
-            content: '';
+            content: "";
             position: absolute;
             top: 0;
             left: 0;
@@ -1091,7 +1312,6 @@
             text-align: center;
             text-align-last: center;
             /* Ensures the selected value is centered */
-
         }
 
         /* Updated Blue Glow Effect on Focus */
@@ -1190,8 +1410,8 @@
         }
 
         input[type="checkbox"]:checked+.custom-checkbox::after {
-            content: 'check';
-            font-family: 'Material Symbols Outlined';
+            content: "check";
+            font-family: "Material Symbols Outlined";
             color: black;
             font-size: 14px;
         }
@@ -1244,7 +1464,9 @@
 
         /* Card-to-List Opacity Transition Container */
         #projects-display-area {
-            transition: opacity 0.3s ease, transform 0.3s ease;
+            transition:
+                opacity 0.3s ease,
+                transform 0.3s ease;
         }
 
         @keyframes sideSlideIn {
@@ -1296,7 +1518,6 @@
             animation: shake 0.2s ease-in-out 0s 2;
         }
     </style>
-
 </head>
 
 <body
@@ -1305,112 +1526,151 @@
     <!-- Ambient Background Effects -->
     <div class="fixed inset-0 z-[-1] overflow-hidden pointer-events-none">
         <div class="absolute inset-0 bg-noise opacity-30"></div>
-        <div class="orb w-[500px] h-[500px] bg-primary top-[-100px] left-[-100px] animate-orb-pulse-1"></div>
-        <div class="orb w-[450px] h-[450px] bg-aurora-pink bottom-[10%] right-[-100px] opacity-20 animate-orb-pulse-2">
+        <div
+            class="orb w-[280px] h-[280px] sm:w-[500px] sm:h-[500px] bg-primary top-[-50px] left-[-50px] sm:top-[-100px] sm:left-[-100px] animate-orb-pulse-1">
         </div>
         <div
-            class="orb w-[600px] h-[600px] bg-aurora-purple top-[40%] left-[50%] transform -translate-x-1/2 opacity-20 animate-orb-pulse-3">
+            class="orb w-[250px] h-[250px] sm:w-[450px] sm:h-[450px] bg-aurora-pink bottom-[10%] right-[-50px] sm:right-[-100px] opacity-20 animate-orb-pulse-2">
+        </div>
+        <div
+            class="orb w-[320px] h-[320px] sm:w-[600px] sm:h-[600px] bg-aurora-purple top-[45%] left-[50%] transform -translate-x-1/2 opacity-15 sm:opacity-20 animate-orb-pulse-3">
         </div>
     </div>
 
-    <!-- Navigation -->
-    <nav class="fixed top-0 left-0 right-0 z-50 px-6 py-4">
-        <div class="glass-panel max-w-6xl mx-auto rounded-full px-6 py-3 flex items-center justify-between relative">
-
-            <a class="logo-shimmer-container relative overflow-hidden flex items-center gap-2 group z-10 rounded-sm"
+    <!-- Navigation Container -->
+    <nav class="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 py-4">
+        <div
+            class="glass-panel max-w-6xl mx-auto rounded-full px-4 sm:px-6 py-2.5 flex items-center justify-between relative">
+            <a class="logo-shimmer-container relative overflow-hidden flex items-center gap-2 group z-50 rounded-sm"
                 href="#">
-
-                <!-- <div
-                    class="w-8 h-8 rounded-full overflow-hidden border border-white/10 flex items-center justify-center bg-gradient-to-br from-primary to-aurora-purple">
-                    <img src="./assets/images/profilePicture.png" alt="Ishkar Singh"
-                        class="w-full h-full object-cover" />
-                </div> -->
                 <img src="./assets/images/DPText.png" alt="Ishkar Singh"
-                    class="logo-shimmer-image h-5 w-auto object-contain hidden sm:block brightness-90 opacity-80 group-hover:brightness-100 group-hover:opacity-100 transition-all duration-300" />
+                    class="logo-shimmer-image h-4 sm:h-5 w-auto object-contain brightness-90 opacity-80 group-hover:brightness-100 group-hover:opacity-100 transition-all duration-300" />
             </a>
 
             <div
                 class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300 absolute left-1/2 -translate-x-1/2">
-                <a class="hover:text-white transition-colors" href="#about">About</a>
-                <a class="hover:text-white transition-colors" href="#skills">Skills</a>
-                <a class="hover:text-white transition-colors" href="#projects">Projects</a>
-                <a class="hover:text-white transition-colors" href="#experience">Career</a>
-                <a class="hover:text-white transition-colors" href="#contact">Contact</a>
+                <a class="inline-block hover:text-white transform hover:scale-110 transition-all duration-300 will-change-transform"
+                    href="#about">About</a>
+                <a class="inline-block hover:text-white transform hover:scale-110 transition-all duration-300 will-change-transform"
+                    href="#skills">Skills</a>
+                <a class="inline-block hover:text-white transform hover:scale-110 transition-all duration-300 will-change-transform"
+                    href="#projects">Projects</a>
+                <a class="inline-block hover:text-white transform hover:scale-110 transition-all duration-300 will-change-transform"
+                    href="#experience">Career</a>
+                <a class="inline-block hover:text-white transform hover:scale-110 transition-all duration-300 will-change-transform"
+                    href="#contact">Contact</a>
             </div>
-
-            <div class="flex items-center gap-3 z-10">
-                <div class="hidden sm:flex items-center gap-2">
+            <div class="flex items-center gap-2 sm:gap-3 z-50">
+                <div class="flex items-center gap-2">
                     <a href="https://github.com/singhishkar108" target="_blank"
-                        class="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 border border-white/10 text-slate-300 hover:text-white hover:bg-white/10 transition-all"
+                        class="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-full bg-white/5 border border-white/10 text-slate-300 hover:text-white hover:bg-white/10 transition-all"
                         title="GitHub">
-                        <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5 fill-current" viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg">
                             <path
                                 d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
                         </svg>
                     </a>
-
                     <a href="https://www.linkedin.com/in/singhishkar/" target="_blank"
-                        class="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 border border-white/10 text-slate-300 hover:text-white hover:bg-white/10 transition-all"
+                        class="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-full bg-white/5 border border-white/10 text-slate-300 hover:text-white hover:bg-white/10 transition-all"
                         title="LinkedIn">
-                        <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5 fill-current" viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg">
                             <path
                                 d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.454c.98 0 1.775-.773 1.775-1.729V1.729C24 .774 23.205 0 22.225 0z" />
                         </svg>
                     </a>
                 </div>
-
-                <!-- <a href="./assets/documents/Ishkar_Singh_CV.pdf" 
-   download="Ishkar_Singh_CV.pdf"
-   class="h-10 px-5 bg-white/10 hover:bg-white/20 text-white text-xs sm:text-sm font-bold rounded-full border border-white/10 transition-all flex items-center gap-2"
-   title="Download CV">
-    <span class="material-symbols-outlined text-[18px]">download</span>
-    <span>Download CV</span>
-</a> -->
+                <button id="mobile-menu-toggle"
+                    class="flex md:hidden flex-col items-center justify-center w-9 h-9 rounded-full bg-white/5 border border-white/10 text-slate-300 hover:text-white transition-all focus:outline-none"
+                    aria-label="Toggle Menu">
+                    <div id="hamburger-top"
+                        class="w-4 h-0.5 bg-current rounded-full transition-all duration-300 -translate-y-0.5"></div>
+                    <div id="hamburger-mid"
+                        class="w-4 h-0.5 bg-current rounded-full transition-all duration-300 my-0.5"></div>
+                    <div id="hamburger-bot"
+                        class="w-4 h-0.5 bg-current rounded-full transition-all duration-300 translate-y-0.5"></div>
+                </button>
+            </div>
+            <div id="mobile-dropdown"
+                class="absolute top-[calc(100%+12px)] left-0 right-0 glass-panel rounded-2xl p-4 flex flex-col gap-2 transition-all duration-300 origin-top scale-y-0 opacity-0 pointer-events-none md:hidden z-40">
+                <a class="mobile-nav-link px-4 py-3 rounded-xl hover:bg-white/5 text-slate-300 hover:text-white font-medium transition-all flex items-center justify-between transform hover:scale-[1.02] active:scale-[0.99] will-change-transform"
+                    href="#about">
+                    <span>About</span><span
+                        class="material-symbols-outlined text-sm opacity-50">arrow_forward_ios</span>
+                </a>
+                <a class="mobile-nav-link px-4 py-3 rounded-xl hover:bg-white/5 text-slate-300 hover:text-white font-medium transition-all flex items-center justify-between transform hover:scale-[1.02] active:scale-[0.99] will-change-transform"
+                    href="#skills">
+                    <span>Skills</span><span
+                        class="material-symbols-outlined text-sm opacity-50">arrow_forward_ios</span>
+                </a>
+                <a class="mobile-nav-link px-4 py-3 rounded-xl hover:bg-white/5 text-slate-300 hover:text-white font-medium transition-all flex items-center justify-between transform hover:scale-[1.02] active:scale-[0.99] will-change-transform"
+                    href="#projects">
+                    <span>Projects</span><span
+                        class="material-symbols-outlined text-sm opacity-50">arrow_forward_ios</span>
+                </a>
+                <a class="mobile-nav-link px-4 py-3 rounded-xl hover:bg-white/5 text-slate-300 hover:text-white font-medium transition-all flex items-center justify-between transform hover:scale-[1.02] active:scale-[0.99] will-change-transform"
+                    href="#experience">
+                    <span>Career</span><span
+                        class="material-symbols-outlined text-sm opacity-50">arrow_forward_ios</span>
+                </a>
+                <a class="mobile-nav-link px-4 py-3 rounded-xl hover:bg-white/5 text-slate-300 hover:text-white font-medium transition-all flex items-center justify-between transform hover:scale-[1.02] active:scale-[0.99] will-change-transform"
+                    href="#contact">
+                    <span>Contact</span><span
+                        class="material-symbols-outlined text-sm opacity-50">arrow_forward_ios</span>
+                </a>
             </div>
         </div>
     </nav>
 
     <!-- Main Content Wrapper -->
-    <main class="relative z-10 flex flex-col items-center w-full pt-32 px-4 sm:px-6">
+    <main class="relative z-10 flex flex-col items-center w-full pt-24 sm:pt-32 px-4 sm:px-6 overflow-x-hidden">
+
         <!-- Landing/Home Page -->
-        <section class="max-w-6xl w-full flex flex-col items-center py-16 sm:py-24 animate-fade-in-up">
-            <div class="w-full flex flex-col md:flex-row items-center md:items-center justify-center gap-24 mb-16">
+        <section class="max-w-6xl w-full flex flex-col items-center py-12 sm:py-24 animate-fade-in-up">
+            <div
+                class="w-full flex flex-col md:flex-row items-center md:items-start justify-center gap-10 md:gap-12 lg:gap-20 mb-12 sm:mb-16">
                 <div
-                    class="animate-slide-slow w-48 h-48 sm:w-64 sm:h-64 flex-shrink-0 rounded-full overflow-hidden border-4 border-white/10 shadow-2xl transition-all duration-500 hover:border-primary/50 relative group">
+                    class="animate-slide-slow w-40 h-40 sm:w-52 sm:h-52 md:w-60 md:h-60 lg:w-64 lg:h-64 flex-shrink-0 rounded-full overflow-hidden border-4 border-white/10 shadow-2xl transition-all duration-500 hover:border-primary/50 relative group md:mt-2">
                     <img src="./assets/images/profilePicture.png" alt="Ishkar Singh"
                         class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                 </div>
-                <div class="flex flex-col items-center md:items-start text-center md:text-left max-w-[46rem]">
+
+                <div
+                    class="flex flex-col items-center md:items-start text-center md:text-left max-w-2xl lg:max-w-3xl w-full px-2 sm:px-0">
                     <h1
-                        class="text-3xl sm:text-4xl lg:text-[52px] font-bold tracking-tight text-white leading-tight whitespace-nowrap">
+                        class="text-2xl sm:text-4xl lg:text-[50px] font-bold tracking-tight text-white leading-tight md:whitespace-nowrap">
                         Bachelor of Computer Science
                     </h1>
-                    <div class="w-full flex items-center gap-4 my-4">
+
+                    <div class="w-full flex items-center gap-4 my-3 sm:my-4">
                         <span class="h-px flex-1 bg-white/20"></span>
                     </div>
+
                     <p
-                        class="text-2xl sm:text-4xl font-semibold tracking-tight flex flex-wrap items-baseline gap-x-2 mb-4">
-                        <span class="animate-container relative">
+                        class="text-xl sm:text-3xl lg:text-4xl font-semibold tracking-tight flex flex-wrap items-center justify-center md:justify-start gap-x-2 gap-y-1 mb-4">
+                        <span class="animate-container relative inline-block">
                             <span id="sliding-text" class="inline-block text-gradient-aurora">Cloud Computing</span>
                         </span>
                         <span class="text-gradient-aurora">Enthusiast</span>
                     </p>
+
                     <p id="scramble-text"
-                        class="text-xl sm:text-2xl font-medium text-[#a6a6a6] mb-4 leading-snug min-h-[1.5em]">
+                        class="text-base sm:text-xl lg:text-2xl font-medium text-[#a6a6a6] mb-6 leading-snug min-h-[3rem] sm:min-h-[1.5em] max-w-md md:max-w-none">
                         Curious. Analytical. Persistent.
                     </p>
-                    <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto mt-4">
-                        <a class="group relative px-8 py-3.5 bg-primary text-white font-semibold rounded-lg overflow-hidden transition-all hover:shadow-[0_0_45px_-10px_rgba(13,13,242,0.6)] flex items-center justify-center cursor-pointer"
+
+                    <div class="flex flex-col sm:flex-row gap-3.5 w-full sm:w-auto mt-2">
+                        <a class="group relative px-8 py-3.5 bg-primary text-white font-semibold rounded-lg overflow-hidden transition-all hover:shadow-[0_0_45px_-10px_rgba(13,13,242,0.6)] flex items-center justify-center cursor-pointer w-full sm:w-auto min-h-[48px]"
                             href="#projects">
                             <div
                                 class="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/60 to-transparent -translate-x-full group-hover:animate-[shimmer_1s_infinite]">
                             </div>
                             <span>View Projects</span>
                         </a>
-                        <a class="px-8 py-3.5 bg-white/5 border border-white/10 text-white font-semibold rounded-lg hover:bg-white/10 transition-all flex items-center justify-center gap-2"
+                        <a class="px-8 py-3.5 bg-white/5 border border-white/10 text-white font-semibold rounded-lg hover:bg-white/10 transition-all flex items-center justify-center gap-2 w-full sm:w-auto min-h-[48px]"
                             href="#contact">
                             <span>Contact Me</span>
-                            <!-- <span class="material-symbols-outlined text-sm">arrow_forward</span> -->
                         </a>
                     </div>
                 </div>
@@ -1440,44 +1700,51 @@
         </section>
 
         <!-- About Me Section -->
-        <section class="max-w-6xl w-full py-16 scroll-mt-24" id="about">
-            <div class="flex items-center gap-4 mb-10 px-2">
+        <section class="max-w-6xl w-full py-12 sm:py-16 scroll-mt-24 px-4 sm:px-6" id="about">
+            <div class="flex items-center gap-4 mb-8 sm:mb-10 px-2">
                 <span class="h-px flex-1 bg-gradient-to-r from-transparent to-white/20"></span>
-                <h2 class="text-3xl font-bold text-white">About Me</h2>
+                <h2 class="text-2xl sm:text-3xl font-bold text-white tracking-tight">About Me</h2>
                 <span class="h-px flex-1 bg-gradient-to-l from-transparent to-white/20"></span>
             </div>
 
-            <div class="glass-panel p-8 sm:p-12 rounded-2xl relative overflow-hidden text-center md:text-left">
+            <div
+                class="p-6 sm:p-10 md:p-12 bg-white/5 border border-white/10 rounded-2xl relative overflow-hidden text-center md:text-left">
                 <div
-                    class="absolute top-0 right-0 w-64 h-64 bg-primary/10 blur-[80px] rounded-full pointer-events-none">
+                    class="absolute top-0 right-0 w-48 h-48 sm:w-64 sm:h-64 bg-primary/10 blur-[60px] sm:blur-[80px] rounded-full pointer-events-none">
                 </div>
 
                 <div class="relative z-10">
                     <p id="typewriter-text"
-                        class="text-slate-300 leading-relaxed text-lg min-h-[150px] after:content-['|'] after:animate-pulse after:ml-1 after:text-primary">
+                        class="text-slate-300 leading-relaxed text-base sm:text-lg min-h-[240px] sm:min-h-[140px] md:min-h-[110px] lg:min-h-[80px]
+                                       relative inline-block w-full
+                                       data-[cursor=done]:after:content-none
+                                       after:content-['|'] after:animate-pulse after:ml-1 after:text-primary after:font-bold"
+                        data-cursor="typing">
                     </p>
                 </div>
             </div>
         </section>
 
-        <!-- Skills Section -->
-        <section class="max-w-6xl w-full py-16 scroll-mt-24" id="skills">
-            <div class="flex items-center gap-4 mb-10 px-2">
+        <!-- Technical Skills Section -->
+        <section class="max-w-6xl w-full py-12 sm:py-16 scroll-mt-24 px-4 sm:px-6" id="skills">
+            <div class="flex items-center gap-4 mb-8 sm:mb-10 px-2">
                 <span class="h-px flex-1 bg-gradient-to-r from-transparent to-white/20"></span>
-                <h2 class="text-3xl font-bold text-white">Technical Skills</h2>
+                <h2 class="text-2xl sm:text-3xl font-bold text-white tracking-tight">Technical Skills</h2>
                 <span class="h-px flex-1 bg-gradient-to-l from-transparent to-white/20"></span>
             </div>
 
             <div class="skills-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
-                <div
-                    class="glass-card relative overflow-hidden p-6 rounded-xl border border-white/10 bg-white/5 dynamic-flashlight transition duration-300">
+                <div class="glass-card relative overflow-hidden p-6 rounded-xl border border-white/10 bg-white/5 dynamic-flashlight transition duration-300 group"
+                    style="background: radial-gradient(600px circle at var(--mouse-x, -999px) var(--mouse-y, -999px), rgba(59, 130, 246, 0.1), transparent 80%);">
                     <div class="relative z-10">
-                        <div class="flex items-center gap-3 mb-6">
-                            <div class="p-2 bg-blue-500/10 rounded-lg text-blue-400">
-                                <span class="material-symbols-outlined">code</span>
+                        <div class="flex items-center gap-3 mb-5">
+                            <div
+                                class="p-2 bg-blue-500/10 rounded-lg text-blue-400 group-hover:bg-blue-500/20 transition-colors">
+                                <span class="material-symbols-outlined block text-xl">code</span>
                             </div>
-                            <h3 class="text-lg font-semibold text-white">Programming Languages</h3>
+                            <h3 class="text-base sm:text-lg font-semibold text-white tracking-tight">Programming
+                                Languages</h3>
                         </div>
                         <div class="flex flex-wrap gap-2">
                             <span
@@ -1497,14 +1764,16 @@
                     </div>
                 </div>
 
-                <div
-                    class="glass-card relative overflow-hidden p-6 rounded-xl border border-white/10 bg-white/5 dynamic-flashlight transition duration-300">
+                <div class="glass-card relative overflow-hidden p-6 rounded-xl border border-white/10 bg-white/5 dynamic-flashlight transition duration-300 group"
+                    style="background: radial-gradient(600px circle at var(--mouse-x, -999px) var(--mouse-y, -999px), rgba(168, 85, 247, 0.1), transparent 80%);">
                     <div class="relative z-10">
-                        <div class="flex items-center gap-3 mb-6">
-                            <div class="p-2 bg-purple-500/10 rounded-lg text-purple-400">
-                                <span class="material-symbols-outlined">layers</span>
+                        <div class="flex items-center gap-3 mb-5">
+                            <div
+                                class="p-2 bg-purple-500/10 rounded-lg text-purple-400 group-hover:bg-purple-500/20 transition-colors">
+                                <span class="material-symbols-outlined block text-xl">layers</span>
                             </div>
-                            <h3 class="text-lg font-semibold text-white">Frameworks & Libraries</h3>
+                            <h3 class="text-base sm:text-lg font-semibold text-white tracking-tight">Frameworks &
+                                Libraries</h3>
                         </div>
                         <div class="flex flex-wrap gap-2">
                             <span
@@ -1522,14 +1791,15 @@
                     </div>
                 </div>
 
-                <div
-                    class="glass-card relative overflow-hidden p-6 rounded-xl border border-white/10 bg-white/5 dynamic-flashlight transition duration-300">
+                <div class="glass-card relative overflow-hidden p-6 rounded-xl border border-white/10 bg-white/5 dynamic-flashlight transition duration-300 group"
+                    style="background: radial-gradient(600px circle at var(--mouse-x, -999px) var(--mouse-y, -999px), rgba(16, 185, 129, 0.1), transparent 80%);">
                     <div class="relative z-10">
-                        <div class="flex items-center gap-3 mb-6">
-                            <div class="p-2 bg-emerald-500/10 rounded-lg text-emerald-400">
-                                <span class="material-symbols-outlined">database</span>
+                        <div class="flex items-center gap-3 mb-5">
+                            <div
+                                class="p-2 bg-emerald-500/10 rounded-lg text-emerald-400 group-hover:bg-emerald-500/20 transition-colors">
+                                <span class="material-symbols-outlined block text-xl">database</span>
                             </div>
-                            <h3 class="text-lg font-semibold text-white">Databases</h3>
+                            <h3 class="text-base sm:text-lg font-semibold text-white tracking-tight">Databases</h3>
                         </div>
                         <div class="flex flex-wrap gap-2">
                             <span
@@ -1546,14 +1816,15 @@
                     </div>
                 </div>
 
-                <div
-                    class="glass-card relative overflow-hidden p-6 rounded-xl border border-white/10 bg-white/5 dynamic-flashlight transition duration-300">
+                <div class="glass-card relative overflow-hidden p-6 rounded-xl border border-white/10 bg-white/5 dynamic-flashlight transition duration-300 group"
+                    style="background: radial-gradient(600px circle at var(--mouse-x, -999px) var(--mouse-y, -999px), rgba(249, 115, 22, 0.1), transparent 80%);">
                     <div class="relative z-10">
-                        <div class="flex items-center gap-3 mb-6">
-                            <div class="p-2 bg-orange-500/10 rounded-lg text-orange-400">
-                                <span class="material-symbols-outlined">cloud_done</span>
+                        <div class="flex items-center gap-3 mb-5">
+                            <div
+                                class="p-2 bg-orange-500/10 rounded-lg text-orange-400 group-hover:bg-orange-500/20 transition-colors">
+                                <span class="material-symbols-outlined block text-xl">cloud_done</span>
                             </div>
-                            <h3 class="text-lg font-semibold text-white">Cloud & DevOps</h3>
+                            <h3 class="text-base sm:text-lg font-semibold text-white tracking-tight">Cloud & DevOps</h3>
                         </div>
                         <div class="flex flex-wrap gap-2">
                             <span
@@ -1570,14 +1841,15 @@
                     </div>
                 </div>
 
-                <div
-                    class="glass-card relative overflow-hidden p-6 rounded-xl border border-white/10 bg-white/5 dynamic-flashlight transition duration-300">
+                <div class="glass-card relative overflow-hidden p-6 rounded-xl border border-white/10 bg-white/5 dynamic-flashlight transition duration-300 group"
+                    style="background: radial-gradient(600px circle at var(--mouse-x, -999px) var(--mouse-y, -999px), rgba(236, 72, 153, 0.1), transparent 80%);">
                     <div class="relative z-10">
-                        <div class="flex items-center gap-3 mb-6">
-                            <div class="p-2 bg-pink-500/10 rounded-lg text-pink-400">
-                                <span class="material-symbols-outlined">api</span>
+                        <div class="flex items-center gap-3 mb-5">
+                            <div
+                                class="p-2 bg-pink-500/10 rounded-lg text-pink-400 group-hover:bg-pink-500/20 transition-colors">
+                                <span class="material-symbols-outlined block text-xl">api</span>
                             </div>
-                            <h3 class="text-lg font-semibold text-white">APIs & Tools</h3>
+                            <h3 class="text-base sm:text-lg font-semibold text-white tracking-tight">APIs & Tools</h3>
                         </div>
                         <div class="flex flex-wrap gap-2">
                             <span
@@ -1591,14 +1863,16 @@
                     </div>
                 </div>
 
-                <div
-                    class="glass-card relative overflow-hidden p-6 rounded-xl border border-white/10 bg-white/5 dynamic-flashlight transition duration-300">
+                <div class="glass-card relative overflow-hidden p-6 rounded-xl border border-white/10 bg-white/5 dynamic-flashlight transition duration-300 group"
+                    style="background: radial-gradient(600px circle at var(--mouse-x, -999px) var(--mouse-y, -999px), rgba(6, 182, 212, 0.1), transparent 80%);">
                     <div class="relative z-10">
-                        <div class="flex items-center gap-3 mb-6">
-                            <div class="p-2 bg-cyan-500/10 rounded-lg text-cyan-400">
-                                <span class="material-symbols-outlined">terminal</span>
+                        <div class="flex items-center gap-3 mb-5">
+                            <div
+                                class="p-2 bg-cyan-500/10 rounded-lg text-cyan-400 group-hover:bg-cyan-500/20 transition-colors">
+                                <span class="material-symbols-outlined block text-xl">terminal</span>
                             </div>
-                            <h3 class="text-lg font-semibold text-white">Development Tools</h3>
+                            <h3 class="text-base sm:text-lg font-semibold text-white tracking-tight">Development Tools
+                            </h3>
                         </div>
                         <div class="flex flex-wrap gap-2">
                             <span
@@ -1617,14 +1891,17 @@
                     </div>
                 </div>
 
-                <div
-                    class="glass-card relative overflow-hidden p-6 rounded-xl border border-white/10 bg-white/5 lg:col-span-3 dynamic-flashlight transition duration-300">
+                <div class="glass-card relative overflow-hidden p-6 rounded-xl border border-white/10 bg-white/5 md:col-span-2 lg:col-span-3 dynamic-flashlight transition duration-300 group"
+                    style="background: radial-gradient(600px circle at var(--mouse-x, -999px) var(--mouse-y, -999px), rgba(234, 179, 8, 0.1), transparent 80%);">
                     <div class="relative z-10">
-                        <div class="flex items-center gap-3 mb-6">
-                            <div class="p-2 bg-yellow-500/10 rounded-lg text-yellow-400">
-                                <span class="material-symbols-outlined">history_edu</span>
+                        <div class="flex items-center gap-3 mb-5">
+                            <div
+                                class="p-2 bg-yellow-500/10 rounded-lg text-yellow-400 group-hover:bg-yellow-500/20 transition-colors">
+                                <span class="material-symbols-outlined block text-xl">history_edu</span>
                             </div>
-                            <h3 class="text-lg font-semibold text-white">Software Engineering Practices</h3>
+                            <h3 class="text-base sm:text-lg font-semibold text-white tracking-tight">Software
+                                Engineering
+                                Practices</h3>
                         </div>
                         <div class="flex flex-wrap gap-2">
                             <span
@@ -1638,66 +1915,73 @@
                         </div>
                     </div>
                 </div>
-
             </div>
         </section>
 
         <!-- Featured Projects -->
-        <section class="max-w-6xl w-full py-16 scroll-mt-24 mx-auto" id="projects">
-            <div class="flex items-center gap-4 mb-10 px-2">
+        <section class="max-w-6xl w-full py-12 sm:py-16 scroll-mt-24 mx-auto px-4 sm:px-6" id="projects">
+            <div class="flex items-center gap-4 mb-8 sm:mb-10 px-2">
                 <span class="h-px flex-1 bg-gradient-to-r from-transparent to-white/20"></span>
-                <h2 class="text-3xl font-bold text-white">Featured Projects</h2>
+                <h2 class="text-2xl sm:text-3xl font-bold text-white tracking-tight">Featured Projects</h2>
                 <span class="h-px flex-1 bg-gradient-to-l from-transparent to-white/20"></span>
             </div>
 
             <div
-                class="glass-panel p-4 rounded-2xl mb-10 border border-white/5 flex flex-wrap items-center justify-between gap-6">
-                <div class="flex items-center gap-4 flex-grow lg:flex-nowrap min-w-[300px]">
-                    <div class="relative w-full max-w-md">
+                class="glass-panel p-4 rounded-2xl mb-8 sm:mb-10 border border-white/5 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 sm:gap-6">
+                <div
+                    class="flex flex-col sm:flex-row flex-wrap lg:flex-nowrap items-stretch sm:items-center gap-4 lg:flex-1 w-full">
+
+                    <div class="relative w-full sm:max-w-xs md:max-w-md flex-1">
                         <span
-                            class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-white text-[18px] z-10 select-none">
+                            class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px] z-10 select-none">
                             search
                         </span>
                         <input type="text" id="project-search" placeholder="Search projects..."
-                            class="glass-input w-full pl-10">
+                            class="glass-input w-full pl-10" />
                     </div>
-                    <div class="flex flex-wrap gap-4 items-center">
-                        <div class="relative">
-                            <select id="lang-filter" class="glass-input text-sm min-w-[150px] text-center">
+
+                    <div class="flex flex-wrap sm:flex-nowrap gap-3 items-center w-full sm:w-auto">
+                        <div class="relative flex-1 sm:flex-none min-w-[140px]">
+                            <select id="lang-filter"
+                                class="glass-input text-sm w-full text-center appearance-none cursor-pointer">
                                 <option value="all" class="text-center">All Languages</option>
                             </select>
                         </div>
 
-                        <div class="relative">
-                            <select id="sort-select" class="glass-input text-sm text-center">
+                        <div class="relative flex-1 sm:flex-none min-w-[140px]">
+                            <select id="sort-select"
+                                class="glass-input text-sm w-full text-center appearance-none cursor-pointer">
                                 <option value="recent" class="text-center">Recently Updated</option>
                                 <option value="az" class="text-center">A-Z</option>
                                 <option value="commits" class="text-center">Most Commits</option>
                             </select>
                         </div>
                     </div>
+                </div>
 
+                <div
+                    class="flex flex-row items-center justify-between sm:justify-end gap-6 border-t border-white/5 pt-4 lg:pt-0 lg:border-t-0 w-full lg:w-auto">
                     <label
-                        class="flex items-center cursor-pointer text-slate-400 text-sm hover:text-white transition-colors group">
-                        <input type="checkbox" id="fork-toggle" class="hidden">
-                        <div class="custom-checkbox mr-2"></div>
-                        Include Forks <span id="fork-count" class="count-badge ml-2">0</span>
+                        class="flex items-center cursor-pointer text-slate-400 text-sm hover:text-white transition-colors group select-none">
+                        <input type="checkbox" id="fork-toggle" class="hidden" />
+                        <div class="custom-checkbox mr-2 shrink-0"></div>
+                        <span class="truncate">Include Forks</span>
+                        <span id="fork-count" class="count-badge ml-2">0</span>
                     </label>
 
-                    <div class="view-switch" id="view-toggle-pill">
+                    <div class="view-switch shrink-0" id="view-toggle-pill">
                         <div class="view-switch-pill"></div>
                         <div class="view-icon-btn active" data-view="card">
-                            <span class="material-symbols-outlined">grid_view</span>
+                            <span class="material-symbols-outlined block text-lg">grid_view</span>
                         </div>
                         <div class="view-icon-btn" data-view="list">
-                            <span class="material-symbols-outlined">list</span>
+                            <span class="material-symbols-outlined block text-lg">list</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div id="projects-display-area"></div>
-
+            <div id="projects-display-area" class="transition-all duration-300 ease-out"></div>
             <div id="pagination-controls"></div>
         </section>
 
@@ -1711,8 +1995,8 @@
 
             <div class="flex flex-col gap-8">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-
-                    <div class="glass-panel p-6 sm:p-8 rounded-2xl transition-all duration-300">
+                    <div
+                        class="glass-panel p-6 sm:p-8 rounded-2xl hover-glow-primary group transition-all duration-300">
                         <h2 class="text-2xl font-bold text-white mb-8 flex items-center gap-3">
                             <span class="p-2 bg-primary/10 rounded-lg text-primary">
                                 <span class="material-symbols-outlined">work</span>
@@ -1727,21 +2011,40 @@
                                 </div>
                                 <h3
                                     class="text-lg font-bold text-white transition-all duration-300 group-hover/timeline:drop-shadow-[0_0_10px_rgba(13,13,242,1)]">
-                                    Mathematics Tutor</h3>
-                                <p class="text-slate-400 text-sm font-medium mb-1">Sonal's Maths &amp; Physics Tuition •
-                                    Part-time • Mar 2024 - Nov 2024</p>
-                                <p class="text-xs text-slate-500 mb-2">Durban, KwaZulu-Natal, South Africa • On-site</p>
+                                    Mathematics Tutor
+                                </h3>
+                                <p class="text-slate-400 text-sm font-medium mb-1">
+                                    Sonal's Maths &amp; Physics Tuition • Part-time • Mar 2024 -
+                                    Nov 2024
+                                </p>
+                                <p class="text-xs text-slate-500 mb-2">
+                                    Durban, KwaZulu-Natal, South Africa • On-site
+                                </p>
                                 <ul class="list-disc list-outside text-sm text-slate-400 pl-4 space-y-1.5 mt-2">
-                                    <li>Tutored secondary school students in algebra, geometry, trigonometry, and
-                                        statistics.</li>
-                                    <li>Assessed student strengths and weaknesses to create personalized learning plans.
+                                    <li>
+                                        Tutored secondary school students in algebra, geometry,
+                                        trigonometry, and statistics.
                                     </li>
-                                    <li>Delivered engaging lessons reinforcing key concepts and problem-solving
-                                        strategies.</li>
-                                    <li>Assisted with homework, practice exercises, and exam preparation.</li>
-                                    <li>Provided individualized guidance to address challenges and ensure progress.</li>
-                                    <li>Fostered a positive, supportive learning environment to build student
-                                        confidence.</li>
+                                    <li>
+                                        Assessed student strengths and weaknesses to create
+                                        personalized learning plans.
+                                    </li>
+                                    <li>
+                                        Delivered engaging lessons reinforcing key concepts and
+                                        problem-solving strategies.
+                                    </li>
+                                    <li>
+                                        Assisted with homework, practice exercises, and exam
+                                        preparation.
+                                    </li>
+                                    <li>
+                                        Provided individualized guidance to address challenges and
+                                        ensure progress.
+                                    </li>
+                                    <li>
+                                        Fostered a positive, supportive learning environment to
+                                        build student confidence.
+                                    </li>
                                 </ul>
                             </div>
 
@@ -1751,31 +2054,54 @@
                                 </div>
                                 <h3
                                     class="text-lg font-bold text-white transition-all duration-300 group-hover/timeline:drop-shadow-[0_0_10px_rgba(13,13,242,1)]">
-                                    Java Programming Tutor</h3>
-                                <p class="text-slate-400 text-sm font-medium mb-1">Emeris • Part-time • Apr 2024 - Jul
-                                    2024</p>
-                                <p class="text-xs text-slate-500 mb-2">Westville, Durban, KwaZulu-Natal, South Africa •
-                                    On-site</p>
+                                    Java Programming Tutor
+                                </h3>
+                                <p class="text-slate-400 text-sm font-medium mb-1">
+                                    Emeris • Part-time • Apr 2024 - Jul 2024
+                                </p>
+                                <p class="text-xs text-slate-500 mb-2">
+                                    Westville, Durban, KwaZulu-Natal, South Africa • On-site
+                                </p>
                                 <ul class="list-disc list-outside text-sm text-slate-400 pl-4 space-y-1.5 mt-2">
-                                    <li>Java programming tutor for Programming 1A [PROG5121] module.</li>
-                                    <li>Assisted first-year Bachelor of Computer Science students with Java fundamentals
-                                        and assignments.</li>
-                                    <li>Tailored lessons to individual student challenges and learning styles.</li>
-                                    <li>Debugged code and guided students in understanding errors and problem-solving.
+                                    <li>
+                                        Java programming tutor for Programming 1A [PROG5121]
+                                        module.
                                     </li>
-                                    <li>Conducted one-on-one and group tutoring sessions, reinforcing classroom
-                                        concepts.</li>
-                                    <li>Reviewed and provided feedback on student code for correctness, efficiency, and
-                                        best practices.</li>
-                                    <li>Collaborated with lecturers and fellow tutors to align strategies and improve
-                                        outcomes.</li>
-                                    <li>Designed additional exercises and coding challenges to enhance learning.</li>
+                                    <li>
+                                        Assisted first-year Bachelor of Computer Science students
+                                        with Java fundamentals and assignments.
+                                    </li>
+                                    <li>
+                                        Tailored lessons to individual student challenges and
+                                        learning styles.
+                                    </li>
+                                    <li>
+                                        Debugged code and guided students in understanding errors
+                                        and problem-solving.
+                                    </li>
+                                    <li>
+                                        Conducted one-on-one and group tutoring sessions,
+                                        reinforcing classroom concepts.
+                                    </li>
+                                    <li>
+                                        Reviewed and provided feedback on student code for
+                                        correctness, efficiency, and best practices.
+                                    </li>
+                                    <li>
+                                        Collaborated with lecturers and fellow tutors to align
+                                        strategies and improve outcomes.
+                                    </li>
+                                    <li>
+                                        Designed additional exercises and coding challenges to
+                                        enhance learning.
+                                    </li>
                                 </ul>
                             </div>
                         </div>
                     </div>
 
-                    <div class="glass-panel p-6 sm:p-8 rounded-2xl transition-all duration-300">
+                    <div
+                        class="glass-panel p-6 sm:p-8 rounded-2xl transition-all duration-300 group hover:shadow-[0_0_30px_0px_rgba(147,51,234,0.3)] hover:border-purple-500/30">
                         <h2 class="text-2xl font-bold text-white mb-8 flex items-center gap-3">
                             <span class="p-2 bg-aurora-purple/10 rounded-lg text-aurora-purple">
                                 <span class="material-symbols-outlined">school</span>
@@ -1790,9 +2116,12 @@
                                 </div>
                                 <h3
                                     class="text-lg font-bold text-white transition-all duration-300 group-hover/timeline:drop-shadow-[0_0_10px_rgba(147,51,234,0.8)]">
-                                    Bachelor of Computer and Information Sciences in Application Development</h3>
-                                <p class="text-slate-400 text-sm font-medium mb-1">Emeris (formerly IIE Varsity College)
-                                    • Jan 2023 – Dec 2025</p>
+                                    Bachelor of Computer and Information Sciences in Application
+                                    Development
+                                </h3>
+                                <p class="text-slate-400 text-sm font-medium mb-1">
+                                    Emeris (formerly IIE Varsity College) • Jan 2023 – Dec 2025
+                                </p>
                                 <div class="mt-2 flex flex-wrap">
                                     <span
                                         class="inline-block bg-aurora-purple text-white text-xs font-bold px-2.5 py-1 rounded-md tracking-wide shadow-sm">
@@ -1801,12 +2130,16 @@
                                 </div>
 
                                 <div class="text-sm text-slate-400 mt-4">
-                                    <p class="font-semibold text-white mb-1 text-xs uppercase tracking-wider">Key
-                                        Highlights:</p>
+                                    <p class="font-semibold text-white mb-1 text-xs uppercase tracking-wider">
+                                        Key Highlights:
+                                    </p>
                                     <ul class="list-disc list-outside pl-4 space-y-1">
-                                        <li><strong>Work Integrated Learning (WIL):</strong> Team Leader for a
-                                            collaborative software project developing a production-ready platform for an
-                                            external NPO (The Sanctuary NPO).</li>
+                                        <li>
+                                            <strong>Work Integrated Learning (WIL):</strong> Team
+                                            Leader for a collaborative software project developing a
+                                            production-ready platform for an external NPO (The
+                                            Sanctuary NPO).
+                                        </li>
                                     </ul>
                                 </div>
 
@@ -1826,8 +2159,9 @@
                                                 class="text-sm font-semibold text-white group-hover/item:text-white transition-colors">
                                                 Golden Key International Honour Society Award
                                             </p>
-                                            <p class="text-xs text-slate-500 mt-0.5">Recognized for Top 15% in academic
-                                                excellence</p>
+                                            <p class="text-xs text-slate-500 mt-0.5">
+                                                Recognized for Top 15% in academic excellence
+                                            </p>
                                         </div>
                                     </a>
                                 </div>
@@ -1837,9 +2171,10 @@
                                 <div
                                     class="absolute -left-[21px] top-1.5 w-3 h-3 rounded-full bg-slate-600 border-4 border-background-dark">
                                 </div>
-                                <h3 class="text-lg font-bold text-white mb-4">Certifications</h3>
+                                <h3 class="text-lg font-bold text-white mb-4">
+                                    Certifications
+                                </h3>
                                 <div class="flex flex-col gap-3.5">
-
                                     <a href="https://tryhackme.com/certificate/THM-XJPHFWRRLD" target="_blank"
                                         rel="noopener noreferrer"
                                         class="glass-card flex items-center gap-4 p-3.5 rounded-xl transition-all duration-300 group/item">
@@ -1850,7 +2185,8 @@
                                                 class="text-sm font-semibold text-white group-hover/item:text-white transition-colors">
                                                 TryHackMe: Pre Security Certificate
                                             </p>
-                                            <p class="text-xs text-slate-500 mt-0.5">Issued Feb 2026 · Expires Feb 2029
+                                            <p class="text-xs text-slate-500 mt-0.5">
+                                                Issued Feb 2026 · Expires Feb 2029
                                             </p>
                                         </div>
                                     </a>
@@ -1863,33 +2199,35 @@
                                         <div>
                                             <p
                                                 class="text-sm font-semibold text-white group-hover/item:text-white transition-colors">
-                                                Cisco Networking Academy: Introduction to Cybersecurity
+                                                Cisco: Introduction to
+                                                Cybersecurity
                                             </p>
-                                            <p class="text-xs text-slate-500 mt-0.5">Issued Dec 2025</p>
+                                            <p class="text-xs text-slate-500 mt-0.5">
+                                                Issued Dec 2025
+                                            </p>
                                         </div>
                                     </a>
-
                                 </div>
                             </div>
-
                         </div>
                     </div>
-
                 </div>
             </div>
         </section>
 
         <!-- Contact Section -->
-        <section class="max-w-6xl w-full py-20 scroll-mt-24 mx-auto" id="contact">
-            <div class="flex items-center gap-4 mb-10 px-2">
+        <section class="max-w-6xl w-full py-16 sm:py-20 scroll-mt-24 mx-auto px-4 sm:px-6" id="contact">
+            <div class="flex items-center gap-4 mb-8 sm:mb-10 px-2">
                 <span class="h-px flex-1 bg-gradient-to-r from-transparent to-white/20"></span>
-                <h2 class="text-3xl font-bold text-white">Let's Connect</h2>
+                <h2 class="text-2xl sm:text-3xl font-bold text-white tracking-tight">Let's Connect</h2>
                 <span class="h-px flex-1 bg-gradient-to-l from-transparent to-white/20"></span>
             </div>
-            <div class="glass-panel p-8 sm:p-12 rounded-2xl">
-                <p class="text-slate-400 mb-10 max-w-3xl mx-auto text-center">
-                    Looking for a collaborator, a developer, or just want to chat about a project? Drop me a message.
+            <div class="glass-panel p-6 sm:p-12 rounded-2xl border border-white/5">
+                <p class="text-slate-400 mb-8 sm:mb-10 max-w-3xl mx-auto text-center text-sm sm:text-base">
+                    Looking for a collaborator, a developer, or just want to chat about
+                    a project? Drop me a message.
                 </p>
+
                 <form id="portfolioContactForm" class="flex flex-col gap-5 text-left w-full mx-auto" novalidate>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div>
@@ -1897,49 +2235,50 @@
                             <div class="relative">
                                 <div
                                     class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
-                                    <span class="material-symbols-outlined text-[20px]">person</span>
+                                    <span class="material-symbols-outlined text-[20px] block">person</span>
                                 </div>
                                 <input
-                                    class="w-full pl-10 pr-4 py-3 bg-background-dark/50 border border-white/10 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary outline-none text-white placeholder-slate-600 transition-all duration-300"
+                                    class="w-full pl-10 pr-4 py-3 bg-background-dark/50 border border-white/10 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary outline-none text-white placeholder-slate-600 transition-all duration-300 text-sm sm:text-base"
                                     id="name" placeholder="Your Name" type="text" autocomplete="name" required />
                             </div>
                         </div>
+
                         <div>
                             <label class="sr-only" for="email">Email Address</label>
                             <div class="relative">
                                 <div
                                     class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
-                                    <span class="material-symbols-outlined text-[20px]">mail</span>
+                                    <span class="material-symbols-outlined text-[20px] block">mail</span>
                                 </div>
                                 <input
-                                    class="w-full pl-10 pr-4 py-3 bg-background-dark/50 border border-white/10 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary outline-none text-white placeholder-slate-600 transition-all duration-300"
+                                    class="w-full pl-10 pr-4 py-3 bg-background-dark/50 border border-white/10 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary outline-none text-white placeholder-slate-600 transition-all duration-300 text-sm sm:text-base"
                                     id="email" placeholder="your@email.com" type="email" autocomplete="email"
                                     required />
                             </div>
                         </div>
                     </div>
+
                     <div>
                         <label class="sr-only" for="message">Message</label>
                         <div class="relative">
                             <div class="absolute top-3 left-0 pl-3 flex items-start pointer-events-none text-slate-500">
-                                <span class="material-symbols-outlined text-[20px]">chat</span>
+                                <span class="material-symbols-outlined text-[20px] block">chat</span>
                             </div>
                             <textarea
-                                class="w-full pl-10 pr-4 py-3 bg-background-dark/50 border border-white/10 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary outline-none text-white placeholder-slate-600 transition-all duration-300 min-h-[160px] resize-y"
+                                class="w-full pl-10 pr-4 py-3 bg-background-dark/50 border border-white/10 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary outline-none text-white placeholder-slate-600 transition-all duration-300 min-h-[160px] resize-y text-sm sm:text-base"
                                 id="message" placeholder="Hello Ishkar, I'd like to discuss..." rows="5"
                                 required></textarea>
                         </div>
                     </div>
+
                     <div class="w-full mt-2">
                         <button id="submitBtn"
-                            class="group relative w-full py-3.5 bg-primary hover:shadow-[0_0_40px_-9px_rgba(13,13,242,0.7)] text-white font-bold rounded-lg overflow-hidden transition-all duration-300 active:scale-[0.99] cursor-pointer disabled:cursor-not-allowed flex items-center justify-center"
+                            class="group relative w-full py-3.5 bg-primary hover:shadow-[0_0_40px_-9px_rgba(13,13,242,0.7)] text-white font-bold rounded-lg overflow-hidden transition-all duration-300 active:scale-[0.99] cursor-pointer disabled:cursor-not-allowed flex items-center justify-center text-sm sm:text-base"
                             type="submit">
-
                             <div
                                 class="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover:animate-[shimmer_1s_infinite]">
                             </div>
-
-                            <span id="submitBtnText" class="relative z-10">Send Message</span>
+                            <span id="submitBtnText" class="relative z-10 tracking-wide">Send Message</span>
                         </button>
                     </div>
                 </form>
@@ -1948,21 +2287,21 @@
 
     </main>
 
-    <footer class="glass-panel w-full relative z-10 py-8 text-center border-t border-white/5">
-        <div class="space-y-2">
-            <p class="text-sm text-slate-400">
-                Copyright &copy; <span id="year"></span> Ishkar Singh. All rights reserved. | Built with passion and
-                code.
+    <footer class="glass-panel w-full relative z-10 py-8 text-center border-t border-white/5 px-4">
+        <div class="max-w-6xl mx-auto space-y-2">
+            <p class="text-sm text-slate-400 leading-relaxed">
+                Copyright &copy; <span id="year"></span> Ishkar Singh. All rights
+                reserved. | Built with passion and code.
             </p>
-            <!-- <p class="text-xs text-slate-600">
-                Powered by the GitHub &amp; Brevo APIs
-            </p> -->
         </div>
     </footer>
 
     <script>
         // This ensures the year is always current without you ever touching it again
-        document.getElementById('year').textContent = new Date().getFullYear();
+        const yearTargetElement = document.getElementById("year");
+        if (yearTargetElement) {
+            yearTargetElement.textContent = new Date().getFullYear();
+        }
     </script>
 </body>
 
