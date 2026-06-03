@@ -95,8 +95,9 @@
                 const isOpen = dropdown.classList.contains("translate-y-0");
 
                 if (isOpen) {
-                    dropdown.classList.remove("translate-y-0", "opacity-100", "pointer-events-auto");
-                    dropdown.classList.add("translate-y-2", "opacity-0", "pointer-events-none");
+                    // FIXED: Added "invisible" toggle transitions here to restore layout visibility states flawlessly
+                    dropdown.classList.remove("translate-y-0", "opacity-100", "pointer-events-auto", "visible");
+                    dropdown.classList.add("translate-y-2", "opacity-0", "pointer-events-none", "invisible");
 
                     hTop.classList.remove("rotate-45", "translate-y-[2px]");
                     hBot.classList.remove("-rotate-45", "-translate-y-[2px]");
@@ -104,8 +105,9 @@
                     hTop.classList.add("-translate-y-0.5");
                     hBot.classList.add("translate-y-0.5");
                 } else {
-                    dropdown.classList.remove("translate-y-2", "opacity-0", "pointer-events-none");
-                    dropdown.classList.add("translate-y-0", "opacity-100", "pointer-events-auto");
+                    // FIXED: Added "visible" toggle transitions here to restore layout visibility states flawlessly
+                    dropdown.classList.remove("translate-y-2", "opacity-0", "pointer-events-none", "invisible");
+                    dropdown.classList.add("translate-y-0", "opacity-100", "pointer-events-auto", "visible");
 
                     hTop.classList.remove("-translate-y-0.5");
                     hBot.classList.remove("translate-y-0.5");
@@ -292,7 +294,7 @@
 
             const next = () => {
                 scrambler.setText(phrases[counter]).then(() => {
-                    setTimeout(next, 3250); // Wait 3 seconds before next phrase
+                    setTimeout(next, 3250); // Wait 3.25 seconds before next phrase
                 });
                 counter = (counter + 1) % phrases.length;
             };
@@ -1240,7 +1242,57 @@
             background: #555;
         }
 
-        /* --- Shimmer effect for logo --- */
+        /* GLASSMORPHISM GLOBAL (REUSEABLE) EFFECTS*/
+
+        .glass-panel {
+            background: rgba(16, 16, 25, 0.4);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.15);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 40px -10px rgba(13, 13, 242, 0.2);
+        }
+
+        /* Animations & Gradients */
+        .text-gradient {
+            background: linear-gradient(to right, #fff, #a5b4fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .text-gradient-aurora {
+            background: linear-gradient(135deg, #fff 0%, #a5b4fc 50%, #e0e7ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .bg-noise {
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: -1;
+            opacity: 0.4;
+        }
+
+        /* --- ISHKAR SINGH LOGO --- */
 
         /* Container rules to constrain the shimmer layer */
         .logo-shimmer-container {
@@ -1259,8 +1311,7 @@
             width: 100%;
             height: 100%;
 
-            /* --- PROMINENT METALLIC GRADIENT UPDATES --- */
-            /* We elevated the opacities significantly (up to 85% and 70%) to make the reflection punchy */
+            /* Metallic Gradient Updates */
             background: linear-gradient(120deg,
                     transparent 25%,
                     rgba(255, 255, 255, 0.15) 35%,
@@ -1278,12 +1329,10 @@
             -webkit-user-select: none;
             user-select: none;
 
-            /* --- BLEND MODE BOOST --- */
-            /* This forces the white shimmer to vividly ignite any colors or details 
-       underneath it, making it look intensely reflective instead of just flat white */
+            /* White shimmer boosts underlying colors and details */
             mix-blend-mode: overlay;
 
-            /* --- ALPHA CHANNEL MASKING --- */
+            /* Alpha Channel Masking */
             -webkit-mask-image: url("./assets/images/DPText.png");
             mask-image: url("./assets/images/DPText.png");
             -webkit-mask-size: contain;
@@ -1308,13 +1357,14 @@
             }
         }
 
-        /* profile picture wrapper uses this one for the premium, slower look */
+        /* PROFILE PICTURE ONLY */
         .animate-slide-slow {
             opacity: 0;
             animation: sideSlideIn 2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
         }
 
-        /* Both classes share this exact same core definition without fighting over it */
+        /* PROFILE PICTURE AND FEATURED PROJECTS */
+        /* Both classes (projects and profile picture) share this function */
         @keyframes sideSlideIn {
             0% {
                 opacity: 0;
@@ -1327,7 +1377,7 @@
             }
         }
 
-        /* --- New Text Split Animations --- */
+        /* DEGREE AND ENTHUSIAST TEXTS */
 
         /* Slides up from below the line divider */
         .animate-slide-up-slow {
@@ -1365,54 +1415,7 @@
             }
         }
 
-        /* --- Reusable Glassmorphism (Skills & Panels) --- */
-        .glass-panel {
-            background: rgba(16, 16, 25, 0.4);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-        }
-
-        .glass-card {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            transition: all 0.3s ease;
-        }
-
-        .glass-card:hover {
-            background: rgba(255, 255, 255, 0.06);
-            border-color: rgba(255, 255, 255, 0.15);
-            transform: translateY(-4px);
-            box-shadow: 0 10px 40px -10px rgba(13, 13, 242, 0.2);
-        }
-
-        /* --- Animations & Gradients --- */
-        .text-gradient {
-            background: linear-gradient(to right, #fff, #a5b4fc);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .text-gradient-aurora {
-            background: linear-gradient(135deg, #fff 0%, #a5b4fc 50%, #e0e7ff 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .bg-noise {
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
-        }
-
-        .orb {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(80px);
-            z-index: -1;
-            opacity: 0.4;
-        }
+        /* ENTHUSIAST TEXT */
 
         .slide-up-enter {
             animation: slide-up-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -1451,15 +1454,13 @@
             vertical-align: bottom;
             overflow: hidden;
             height: 1.23em;
-            /* Adjusted slightly for descenders like 'y' */
             white-space: nowrap;
-            /* Prevents "Computing" from wrapping to a hidden line */
             transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        /* --- Technical Skills Section Flashlight Card Animation --- */
+        /* TECHNICAL SKILLS */
 
-        /* Flashlight spotlight hover effect styling overlay */
+        /* Flashlight spotlight hover effect */
         .dynamic-flashlight::before {
             content: "";
             position: absolute;
@@ -1494,19 +1495,17 @@
             transform: translateY(0);
         }
 
-        /* --- Project Section Glass Inputs --- */
+        /* FEATURED PROJECTS */
 
-        /* --- Dedicated Search & Filter Styling --- */
+        /* Dedicated Search & Filter Styling */
         .glass-input {
             /* Force transparency to kill the white box from Screenshot 2026-05-01 002526.jpg */
             background: rgba(255, 255, 255, 0.03) !important;
             backdrop-filter: blur(12px) !important;
             -webkit-backdrop-filter: blur(12px) !important;
-
             /* Perfect match for filter corners and borders */
             border: 1px solid rgba(255, 255, 255, 0.1) !important;
             border-radius: 10px !important;
-
             color: white !important;
             padding: 0.6rem 1rem;
             font-size: 0.875rem;
@@ -1595,7 +1594,7 @@
             padding-left: 2.5rem;
         }
 
-        /* --- Custom Checkbox (Include Forks) --- */
+        /* Custom Checkbox (Include Forks) */
         .custom-checkbox {
             width: 18px;
             height: 18px;
@@ -1620,7 +1619,7 @@
             font-size: 14px;
         }
 
-        /* --- Video-Style Pill Slider (View Toggle) --- */
+        /* Video-Style Pill Slider (View Toggle) */
         .view-switch {
             position: relative;
             display: flex;
@@ -1701,7 +1700,7 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        /* --- Education & Experience  --- */
+        /* EDUCATION & EXPERIENCE */
 
         /* Base state for Left Slide-In (Experience) */
         .slide-reveal-left {
@@ -1725,7 +1724,7 @@
         }
 
 
-        /* --- Contact form --- */
+        /* --- CONTACT FORM --- */
 
         /* Base state for Top to Bottom Slide-In (Contact) */
         .slide-reveal-contact {
@@ -1833,7 +1832,7 @@
                             class="w-0 md:group-hover/btn:w-auto opacity-0 md:group-hover/btn:opacity-100 ml-0 md:group-hover/btn:ml-2 text-xs sm:text-sm font-medium transition-all duration-300 ease-in-out select-none">LinkedIn</span>
                     </a>
 
-                    <a href="mailto:ishkar.sing.108@gmail.com"
+                    <a href="mailto:ishkar.singh.108@gmail.com"
                         class="group/btn w-9 h-9 sm:w-10 sm:h-10 md:hover:w-[84px] lg:hover:w-[92px] flex items-center justify-center md:hover:justify-start pl-0 md:hover:pl-2.5 lg:hover:pl-3 rounded-full bg-white/5 border border-white/10 text-slate-300 hover:text-white hover:bg-white/10 transition-all duration-300 ease-in-out overflow-hidden whitespace-nowrap"
                         title="Email Me">
                         <svg class="w-4 h-4 sm:w-5 sm:h-5 fill-current flex-shrink-0" viewBox="0 0 24 24"
@@ -1852,7 +1851,8 @@
                     <div id="hamburger-top"
                         class="w-4 h-0.5 bg-current rounded-full transition-all duration-300 -translate-y-0.5"></div>
                     <div id="hamburger-mid"
-                        class="w-4 h-0.5 bg-current rounded-full transition-all duration-300 my-0.5"></div>
+                        class="w-4 h-0.5 bg-current rounded-full transition-all duration-300 my-0.5">
+                    </div>
                     <div id="hamburger-bottom"
                         class="w-4 h-0.5 bg-current rounded-full transition-all duration-300 translate-y-0.5"></div>
                 </button>
@@ -1860,7 +1860,7 @@
         </div>
 
         <div id="mobile-dropdown" style="will-change: filter, transform, opacity;"
-            class="glass-panel max-w-6xl mx-auto mt-3 rounded-2xl p-4 flex flex-col gap-2 transition-all duration-300 translate-y-2 opacity-0 pointer-events-none min-[830px]:hidden z-40">
+            class="glass-panel absolute left-4 right-4 sm:left-6 sm:right-6 max-w-6xl mx-auto mt-3 rounded-2xl p-4 flex flex-col gap-2 transition-all duration-300 translate-y-2 opacity-0 invisible pointer-events-none min-[830px]:hidden z-40">
 
             <a class="mobile-nav-link px-4 py-3 rounded-xl hover:bg-white/5 text-slate-300 hover:text-white font-medium transition-all flex items-center justify-between transform hover:scale-[1.02] active:scale-[0.99] will-change-transform"
                 href="#about">
@@ -1902,7 +1902,7 @@
                             d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.454c.98 0 1.775-.773 1.775-1.729V1.729C24 .774 23.205 0 22.225 0z" />
                     </svg>
                 </a>
-                <a href="mailto:ishkar.sing.108@gmail.com"
+                <a href="mailto:ishkar.singh.108@gmail.com"
                     class="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 border border-white/10 text-slate-300 hover:text-white hover:bg-white/10 transition-all duration-300"
                     title="Email Me">
                     <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -1913,7 +1913,6 @@
             </div>
         </div>
     </nav>
-
 
     <!-- Main Content Wrapper -->
     <main class="relative z-10 flex flex-col items-center w-full pt-24 sm:pt-32 px-4 sm:px-6 overflow-x-hidden">
