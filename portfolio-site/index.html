@@ -355,8 +355,8 @@
                 if (!response.ok) throw new Error("API Error");
                 githubData = await response.json();
 
-                // Populate grid immediately
-                renderProjectGrid(githubData.recentProjects);
+                // Pass the public projects payload returned from our API to the grid renderer
+                renderProjectGrid(githubData.projects);
 
                 // If the user is ALREADY looking at the stats when data arrives, start!
                 checkVisibilityAndStart();
@@ -368,7 +368,6 @@
                 githubData = { projectCount: 0, commitCount: 0, languageCount: 0 };
 
                 // --- THE FALLBACK IMPLEMENTATION ---
-                // Directly target and overwrite the values with "X"
                 const statIds = [
                     "stat-years",
                     "stat-projects",
@@ -1224,6 +1223,13 @@
     </script>
 
     <style>
+        .orb {
+            transform: translateZ(0);
+            will-change: transform, opacity;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+
         /* --- Base Scrollbar Styles --- */
         ::-webkit-scrollbar {
             width: 8px;
@@ -1766,8 +1772,7 @@
 <body
     class="bg-background-dark text-slate-200 font-display antialiased overflow-x-hidden selection:bg-primary selection:text-white">
 
-    <!-- Ambient Background Effects -->
-    <div class="fixed inset-0 z-[-1] overflow-hidden pointer-events-none">
+    <div class="fixed inset-0 z-[-1] overflow-hidden pointer-events-none" style="transform: translateZ(0);">
         <div class="absolute inset-0 bg-noise opacity-30"></div>
         <div
             class="orb w-[280px] h-[280px] sm:w-[500px] sm:h-[500px] bg-primary top-[-50px] left-[-50px] sm:top-[-100px] sm:left-[-100px] animate-orb-pulse-1">
@@ -1779,7 +1784,6 @@
             class="orb w-[320px] h-[320px] sm:w-[600px] sm:h-[600px] bg-aurora-purple top-[45%] left-[50%] transform -translate-x-1/2 opacity-15 sm:opacity-20 animate-orb-pulse-3">
         </div>
     </div>
-
     <!-- Navigation Container -->
     <nav class="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 py-4">
         <div

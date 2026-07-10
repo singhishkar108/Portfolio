@@ -17,7 +17,8 @@ exports.handler = async (event, context) => {
   };
 
   try {
-    // 1. Fetch all repositories (up to 100) where you are the owner
+    // 1. Fetch ALL repositories (including private and archived) where you are the owner
+    // "type=owner" combined with authorization token automatically yields private repos too
     const reposResponse = await fetch(
       "https://api.github.com/user/repos?per_page=100&type=owner&sort=updated",
       { headers },
@@ -31,23 +32,21 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // 2. Fetch global commit stats for the top-level stats bar
+    // 2. Fetch global commit stats for the top-level stats bar (includes public & private)
     const globalCommitsResponse = await fetch(
-      "https://api.github.com/search/commits?q=author:singhishkar108",
+      "https://api.github.com/search/commits?q=author:singhishkar108+is:public,private",
       { headers },
     );
     const globalCommitsData = await globalCommitsResponse.json();
 
     // 3. Process each repository to get detailed languages and commit counts
-    // We use Promise.all to fetch this data in parallel for speed
     const detailedRepos = await Promise.all(
       repos.map(async (repo) => {
         // Fetch specific languages for this repo
         const langRes = await fetch(repo.languages_url, { headers });
         const languages = await langRes.json();
 
-        // Fetch commit activity (participation) to approximate commit count
-        // GitHub API 'participation' returns weekly commit counts for the last year
+        // Fetch commit activity (participation)
         const statsRes = await fetch(`${repo.url}/stats/participation`, {
           headers,
         });
@@ -65,28 +64,36 @@ exports.handler = async (event, context) => {
           stars: repo.stargazers_count,
           forks: repo.forks_count,
           isFork: repo.fork,
+          isPrivate: repo.private, // Track privacy
+          isArchived: repo.archived, // Track archive status
           updated_at: repo.updated_at,
-          language: repo.language, // Primary language
-          all_languages: Object.keys(languages), // List of all languages used
+          language: repo.language,
+          all_languages: Object.keys(languages),
           commit_count: totalCommits,
         };
       }),
     );
 
-    // 4. Create a unique list of all languages across all repos for the filter dropdown
+    // 4. Create a unique list of all languages across ALL items (including private/archived)
     const allLanguages = [
       ...new Set(detailedRepos.flatMap((r) => r.all_languages)),
     ].sort();
+
+    // 5. Separate data: stats bar counts everything, grid gets ONLY public + non-archived
+    const globalProjectCount = detailedRepos.filter((r) => !r.isFork).length;
+    const publicDisplayProjects = detailedRepos.filter(
+      (r) => !r.isPrivate && !r.isArchived,
+    );
 
     return {
       statusCode: 200,
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        projectCount: detailedRepos.filter((r) => !r.isFork).length,
+        projectCount: globalProjectCount, // Private + Public count
         commitCount: globalCommitsData.total_count || 0,
-        languageCount: allLanguages.length,
-        allLanguages: allLanguages, // For the dropdown menu
-        projects: detailedRepos, // The full list for the frontend to filter/sort
+        languageCount: allLanguages.length, // Complete cross-repo languages count
+        allLanguages: allLanguages,
+        projects: publicDisplayProjects, // Kept explicitly to clean public display repos
       }),
     };
   } catch (error) {
