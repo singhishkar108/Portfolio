@@ -4,3 +4,47 @@
 
 [dev]
   functions = "netlify/functions"
+
+# Rate Limiting Configuration
+[[ratelimits]]
+  for = "/.netlify/functions/sendEmail"
+  window_limit = 5
+  window_size = 60 # 60 seconds
+  aggregate_by = ["ip"]
+
+# Rate Limit for GitHub Data Endpoint (max 10 calls per minute per IP)
+[[ratelimits]]
+  for = "/.netlify/functions/getGithubData"
+  window_limit = 10
+  window_size = 60
+  aggregate_by = ["ip"]
+
+  [[redirects]]
+  from = "/*"
+  to = "/404.html"
+  status = 404
+
+# Global Security Headers
+[[headers]]
+  for = "/*"
+  [headers.values]
+    # Prevents clickjacking by forbidding external site framing
+    X-Frame-Options = "DENY"
+
+    # Prevents browsers from MIME-sniffing a response away from the declared content-type
+    X-Content-Type-Options = "nosniff"
+
+    # Enforces HTTPS connections for 1 year, including subdomains
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
+
+    # Controls how much referrer information is passed with requests
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+    # Restricts access to browser features/hardware APIs
+    Permissions-Policy = "camera=(), microphone=(), geolocation=(), payment=()"
+
+    # Legacy browser protection against cross-site scripting
+    X-XSS-Protection = "1; mode=block"
+
+    # Restricts resources while allowing external CDNs, Google Fonts, and inline styling
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https:;"
